@@ -1,2 +1,9 @@
 # Calcoli-statistici-tra-X-e-Y
 Programma in html, utilizzato per studio scolastico, e facilitamento dei calcoli, con funzione di calcolo dati statistici fra X ed Y come: Media/Moda/Mediana, Variazione/Scarto,  Deviazione etc...
+
+Il programma è stato fatto da 2 studenti di 4^a superiore [Antonio Meucci, cittadella (PD)]
+Con il supplemento di: ChatGPT, Deepseek e BlackBoxAI, per funzioni non ancora studiate.
+
+Funzionalità principale, verificare i calcoli effettuali e fare calcoli semplici di statistica BASE.
+
+Codice open source, aperto a chiunque senza costi aggiuntivi.

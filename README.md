@@ -7,3 +7,5 @@ Con il supplemento di: ChatGPT, Deepseek e BlackBoxAI, per funzioni non ancora s
 Funzionalità principale, verificare i calcoli effettuali e fare calcoli semplici di statistica BASE.
 
 Codice open source, aperto a chiunque senza costi aggiuntivi.
+
+PROVA LA DEMO: https://qlxmn.github.io/Calcoli-statistici-tra-X-e-Y/

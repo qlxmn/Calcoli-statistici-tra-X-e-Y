@@ -8,4 +8,4 @@ Funzionalità principale, verificare i calcoli effettuali e fare calcoli semplic
 
 Codice open source, aperto a chiunque senza costi aggiuntivi.
 
-PROVA LA DEMO: https://qlxmn.github.io/Calcoli-statistici-tra-X-e-Y/
+PROVA LA DEMO!!! https://qlxmn.github.io/Calcoli-statistici-tra-X-e-Y/

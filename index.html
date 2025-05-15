@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Statistica X/Y</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+
+    body.light-theme { background-color: #f9f9f9; color: #222; }
+    body.dark-theme { background-color: #222; color: #f9f9f9; }
+
+    .hidden { display: none; }
+    .container { max-width: 800px; margin: auto; padding: 1rem; }
+    button, input { margin: 4px; padding: 8px; border-radius: 6px; }
+
+    .tabs {
+      display: flex;
+      margin-top: 1rem;
+      border-bottom: 2px solid #ccc;
+    }
+
+    .tab {
+      padding: 10px 15px;
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+
+    .tab.active {
+      border-bottom: 3px solid #4CAF50;
+      color: #4CAF50;
+    }
+
+    .tab-content {
+      display: none;
+      margin-top: 1rem;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .error { color: red; font-weight: bold; margin-top: 10px; }
+  </style>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+
+</head>
+<body class="dark-theme">
+  <div class="container">
+    <button id="toggleTheme">🌙 Cambia tema</button>
+    <h2>Calcoli statistici tra X e Y</h2>
+
+    <label>Quanti valori vuoi inserire?</label>
+    <input type="number" id="numValues" min="1">
+    <button onclick="generaInput()">Genera</button>
+
+    <form id="valoriForm" class="hidden">
+      <div id="inputContainer"></div>
+
+      <div class="tabs hidden" id="tabHeader">
+        <button type="button" class="tab active" onclick="showTab('descrittiva')">📊 Descrittiva</button>
+        <button type="button" class="tab" onclick="showTab('regressione')">📈 Regressione</button>
+        <button type="button" class="tab" onclick="showTab('correlazione')">🔗 Correlazione</button>
+      </div>
+
+      <div class="tab-content active" id="descrittiva">
+        <button type="button" onclick="calcolaMedieComplesse()">Tutte le medie</button>
+        <button type="button" onclick="calcolaMediaMedianaModa()">Mediana / Moda</button>
+        <button type="button" onclick="calcolaDeviazioni()">Deviazioni standard</button>
+        <button type="button" onclick="calcolaDispersione()">Variazione e Scarto</button>
+        <button type="button" onclick="generaTabellaContingenza()">Tabella</button>
+    
+
+      </div>
+
+      <div class="tab-content" id="regressione">
+        <button type="button" onclick="calcolaA()">Coefficiente a</button>
+        <button type="button" onclick="calcolaB()">Coefficiente b</button>
+        <button type="button" onclick="calcolaChiQuadrato()">χ² e C</button>
+      </div>
+
+      <div class="tab-content" id="correlazione">
+        <button type="button" onclick="calcolaVarianza()">Varianza</button>
+        <button type="button" onclick="calcolaCovarianza()">Covarianza</button>
+        <button type="button" onclick="calcolaPearsonER2()">Pearson & R²</button>
+      </div>
+
+      <div style="margin-top:1rem;">
+        <button type="button" onclick="resetTutto()">🔄 Reset</button>
+      </div>
+    </form>
+
+    <div id="risultato"></div>
+    <div id="errore" class="error"></div>
+  </div>
+
+  <script>
+    let x = [], y = [], n = 0;
+    let mediaX = 0, mediaY = 0;
+    let sigmaX = 0, sigmaY = 0, covXY = 0, a = 0, b = 0;
+
+    function generaInput() {
+      n = parseInt(document.getElementById('numValues').value);
+      const container = document.getElementById('inputContainer');
+      container.innerHTML = '';
+      document.getElementById('errore').textContent = '';
+
+      if (isNaN(n) || n <= 0) {
+        document.getElementById('errore').textContent = 'Inserisci un numero valido di valori.';
+        return;
+      }
+
+      for (let i = 0; i < n; i++) {
+        container.innerHTML += `
+          <label>X${i + 1}: <input type="number" step="any" name="x"></label>
+          <label>Y${i + 1}: <input type="number" step="any" name="y"></label><br>
+        `;
+      }
+
+      document.getElementById('valoriForm').classList.remove('hidden');
+      document.getElementById('tabHeader').classList.remove('hidden');
+    }
+
+    function showTab(id) {
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+
+      document.querySelector(`.tab[onclick*="${id}"]`).classList.add('active');
+      document.getElementById(id).classList.add('active');
+    }
+
+    function leggiValori() {
+      const xInputs = document.getElementsByName('x');
+      const yInputs = document.getElementsByName('y');
+      x = Array.from(xInputs, input => parseFloat(input.value));
+      y = Array.from(yInputs, input => parseFloat(input.value));
+
+      if (x.includes(NaN) || y.includes(NaN)) {
+        document.getElementById('errore').textContent = 'Tutti i campi devono essere compilati con numeri.';
+        throw new Error("Dati incompleti");
+      }
+
+      document.getElementById('errore').textContent = '';
+      mediaX = media(x);
+      mediaY = media(y);
+    }
+
+    function media(arr) {
+      return arr.reduce((a, b) => a + b, 0) / arr.length;
+    }
+
+    function mediana(arr) {
+      const sorted = [...arr].sort((a, b) => a - b);
+      const mid = Math.floor(sorted.length / 2);
+      return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
+    }
+
+    function moda(arr) {
+      const freq = {};
+      arr.forEach(val => freq[val] = (freq[val] || 0) + 1);
+      const maxFreq = Math.max(...Object.values(freq));
+      const mode = Object.keys(freq).filter(k => freq[k] == maxFreq);
+      return mode.length === arr.length ? 'Nessuna (tutti diversi)' : mode.join(', ');
+    }
+
+    function calcolaMediaMedianaModa() {
+  try {
+    leggiValori();
+
+    const medianaX = mediana(x);
+    const medianaY = mediana(y);
+    const modaX = moda(x);
+    const modaY = moda(y);
+
+    document.getElementById('risultato').innerHTML = `
+      <h3>Mediana e Moda</h3>
+      <b>X:</b> mediana = ${medianaX}, moda = ${modaX}<br>
+      <b>Y:</b> mediana = ${medianaY}, moda = ${modaY}
+    `;
+  } catch {}
+}
+
+function calcolaPearsonER2() {
+  try {
+    leggiValori();
+    const n = x.length;
+    if (n !== y.length || n === 0) {
+      throw new Error("Gli array devono avere la stessa lunghezza e non essere vuoti.");
+    }
+
+    const mediaX = x.reduce((acc, val) => acc + val, 0) / n;
+    const mediaY = y.reduce((acc, val) => acc + val, 0) / n;
+
+    let sommaXY = 0, sommaX2 = 0, sommaY2 = 0;
+    for (let i = 0; i < n; i++) {
+      const dx = x[i] - mediaX;
+      const dy = y[i] - mediaY;
+      sommaXY += dx * dy;
+      sommaX2 += dx * dx;
+      sommaY2 += dy * dy;
+    }
+
+    const r = sommaXY / Math.sqrt(sommaX2 * sommaY2);
+    const r2 = r * r;
+
+    document.getElementById('risultato').innerHTML = `
+      <h3>Coefficiente di Pearson e R²</h3>
+      r = ${r.toFixed(4)}<br>
+      R² = ${r2.toFixed(4)}
+    `;
+  } catch(e) {
+    document.getElementById('errore').textContent = 'Errore nel calcolo: ' + e.message;
+  }
+}
+
+
+
+    function calcolaDeviazioni() {
+      try {
+        leggiValori();
+        sigmaX = Math.sqrt(x.reduce((acc, xi) => acc + Math.pow(xi - mediaX, 2), 0) / n);
+        sigmaY = Math.sqrt(y.reduce((acc, yi) => acc + Math.pow(yi - mediaY, 2), 0) / n);
+
+        document.getElementById('risultato').innerHTML = `
+          <h3>Deviazioni Standard</h3>
+          σₓ = ${sigmaX.toFixed(4)}<br>
+          σᵧ = ${sigmaY.toFixed(4)}
+        `;
+      } catch {}
+    }
+
+    function calcolaVarianza() {
+      try {
+        leggiValori();
+        const varX = x.reduce((acc, xi) => acc + Math.pow(xi - mediaX, 2), 0) / n;
+        const varY = y.reduce((acc, yi) => acc + Math.pow(yi - mediaY, 2), 0) / n;
+
+        document.getElementById('risultato').innerHTML = `
+          <h3>Varianza</h3>
+          Var(X) = ${varX.toFixed(4)}<br>
+          Var(Y) = ${varY.toFixed(4)}
+        `;
+      } catch {}
+    }
+
+    function calcolaCovarianza() {
+      try {
+        leggiValori();
+        covXY = x.reduce((acc, xi, i) => acc + (xi - mediaX) * (y[i] - mediaY), 0) / n;
+        sigmaX = Math.sqrt(x.reduce((acc, xi) => acc + Math.pow(xi - mediaX, 2), 0) / n); // calcolo sigmaX
+        sigmaY = Math.sqrt(y.reduce((acc, yi) => acc + Math.pow(yi - mediaY, 2), 0) / n); // calcolo sigmaY
+        
+        document.getElementById('risultato').innerHTML = `
+          <h3>Covarianza</h3>
+          σₓᵧ = ${covXY.toFixed(4)}<br>
+          σₓ = ${sigmaX.toFixed(4)}<br>
+          σᵧ = ${sigmaY.toFixed(4)}
+        `;
+      } catch {}
+    }
+
+    function calcolaB() {
+      try {
+        leggiValori();
+        const num = x.reduce((acc, xi, i) => acc + (xi - mediaX) * (y[i] - mediaY), 0);
+        const den = y.reduce((acc, yi) => acc + Math.pow(yi - mediaY, 2), 0);
+        b = num / den;
+
+        document.getElementById('risultato').innerHTML = `
+          <h3>Coefficiente b (regressione)</h3>
+          b = ${b.toFixed(4)}
+        `;
+      } catch {}
+    }
+
+    function calcolaA() {
+      try {
+        leggiValori();
+        const num = x.reduce((acc, xi, i) => acc + (xi - mediaX) * (y[i] - mediaY), 0);
+        const den = x.reduce((acc, xi) => acc + Math.pow(xi - mediaX, 2), 0);
+        a = num / den;
+
+        document.getElementById('risultato').innerHTML = `
+          <h3>Coefficiente a (interpolazione)</h3>
+          a = ${a.toFixed(4)}
+        `;
+      } catch {}
+    }
+
+function calcolaMedieComplesse() {
+  leggiValori(); // Deve riempire x, y e n
+
+  // Funzione di supporto: media aritmetica semplice
+  const media = arr => arr.reduce((a, b) => a + b, 0) / arr.length;
+
+  // Media aritmetica
+  const mediaAritmeticaX = media(x);
+  const mediaAritmeticaY = media(y);
+
+  // Frequenze come pesi (es: 5 appare 3 volte → peso = 3)
+  const frequenzeX = {};
+  const frequenzeY = {};
+  x.forEach(xi => frequenzeX[xi] = (frequenzeX[xi] || 0) + 1);
+  y.forEach(yi => frequenzeY[yi] = (frequenzeY[yi] || 0) + 1);
+
+  // Media ponderata con pesi = frequenze
+  const pesoTotaleX = x.reduce((acc, xi) => acc + frequenzeX[xi], 0);
+  const pesoTotaleY = y.reduce((acc, yi) => acc + frequenzeY[yi], 0);
+  const mediaPonderataX = x.reduce((acc, xi) => acc + xi * frequenzeX[xi], 0) / pesoTotaleX;
+  const mediaPonderataY = y.reduce((acc, yi) => acc + yi * frequenzeY[yi], 0) / pesoTotaleY;
+
+  // Media geometrica
+  const prodottoX = x.reduce((acc, xi) => acc * xi, 1);
+  const prodottoY = y.reduce((acc, yi) => acc * yi, 1);
+  const mediaGeometricaX = Math.pow(prodottoX, 1 / n);
+  const mediaGeometricaY = Math.pow(prodottoY, 1 / n);
+
+  // Media armonica
+  const sommaInversiX = x.reduce((acc, xi) => acc + 1 / xi, 0);
+  const sommaInversiY = y.reduce((acc, yi) => acc + 1 / yi, 0);
+  const mediaArmonicaX = n / sommaInversiX;
+  const mediaArmonicaY = n / sommaInversiY;
+
+  // Media quadratica
+  const sommaQuadratiX = x.reduce((acc, xi) => acc + xi * xi, 0);
+  const sommaQuadratiY = y.reduce((acc, yi) => acc + yi * yi, 0);
+  const mediaQuadraticaX = Math.sqrt(sommaQuadratiX / n);
+  const mediaQuadraticaY = Math.sqrt(sommaQuadratiY / n);
+
+  // Stringa leggibile per i pesi
+  const pesiXStr = Object.entries(frequenzeX).map(([val, peso]) => `${val}: ${peso}`).join(", ");
+  const pesiYStr = Object.entries(frequenzeY).map(([val, peso]) => `${val}: ${peso}`).join(", ");
+
+  // Output nel DOM
+  document.getElementById('risultato').innerHTML = `
+    <h3>Medie Complesse</h3>
+    <b>Media aritmetica:</b> X = ${mediaAritmeticaX.toFixed(4)}, Y = ${mediaAritmeticaY.toFixed(4)}<br><br>
+    <b>Media ponderata (per frequenze):</b> X = ${mediaPonderataX.toFixed(4)}, Y = ${mediaPonderataY.toFixed(4)}<br>
+    <b>Pesi (frequenze) X:</b> ${pesiXStr}<br>
+    <b>Pesi (frequenze) Y:</b> ${pesiYStr}<br><br>
+    <b>Media geometrica:</b> X = ${mediaGeometricaX.toFixed(4)}, Y = ${mediaGeometricaY.toFixed(4)}<br><br>
+    <b>Media armonica:</b> X = ${mediaArmonicaX.toFixed(4)}, Y = ${mediaArmonicaY.toFixed(4)}<br><br>
+    <b>Media quadratica:</b> X = ${mediaQuadraticaX.toFixed(4)}, Y = ${mediaQuadraticaY.toFixed(4)}<br><br>
+  `;
+
+  // Rendering formule matematiche (se usi MathJax)
+  if (window.MathJax) {
+    MathJax.typesetPromise();
+  }
+}
+
+
+
+function calcolaChiQuadrato() {
+  leggiValori();
+  // Supponiamo che x siano i valori osservati e y quelli attesi
+  let chi2 = 0;
+  for (let i = 0; i < n; i++) {
+    if (y[i] !== 0) { // evita divisione per zero
+      chi2 += Math.pow(x[i] - y[i], 2) / y[i];
+    }
+  }
+
+  // Chi quadrato normalizzato = chi² / n
+  const chi2Normalizzato = chi2 / n;
+
+  // Sovrascrive il contenuto del div risultato
+  document.getElementById('risultato').innerHTML = `
+    <h3>Test Chi Quadrato</h3>
+    <b>Chi quadrato (χ²):</b> ${chi2.toFixed(4)}<br>
+    <b>Chi quadrato normalizzato:</b> ${chi2Normalizzato.toFixed(4)}<br><br>
+  `;
+
+  if (window.MathJax) {
+    MathJax.typesetPromise();
+  }
+}
+
+function calcolaDispersione() {
+  leggiValori();
+  // Calcola campo di variazione per X e Y
+  const campoX = Math.max(...x) - Math.min(...x);
+  const campoY = Math.max(...y) - Math.min(...y);
+
+  // Media aritmetica (serve per scarto semplice medio)
+  const mediaX = media(x);
+  const mediaY = media(y);
+
+  // Scarto semplice medio = media degli scarti assoluti
+  const scartoX = x.reduce((acc, xi) => acc + Math.abs(xi - mediaX), 0) / n;
+  const scartoY = y.reduce((acc, yi) => acc + Math.abs(yi - mediaY), 0) / n;
+
+  // Mostra risultati (sovrascrive)
+  document.getElementById('risultato').innerHTML = `
+    <h3>Misure di Dispersione</h3>
+    <b>Campo di variazione:</b> X = ${campoX}, Y = ${campoY}<br>
+    <b>Scarto semplice medio:</b> X = ${scartoX.toFixed(4)}, Y = ${scartoY.toFixed(4)}<br><br>
+  `;
+
+  if (window.MathJax) {
+    MathJax.typesetPromise();
+  }
+}
+
+function generaTabellaContingenza() {
+  leggiValori();
+  // 1. Ottieni le categorie distinte
+  const categorieX = [...new Set(x)].sort((a, b) => a - b);
+  const categorieY = [...new Set(y)].sort((a, b) => a - b);
+
+  // 2. Crea matrice contingenza (righe: x, colonne: y)
+  const tabella = Array.from({ length: categorieX.length }, () =>
+    Array(categorieY.length).fill(0)
+  );
+
+  // 3. Popola la matrice: conta le occorrenze
+  for (let i = 0; i < n; i++) {
+    const xi = categorieX.indexOf(x[i]);
+    const yi = categorieY.indexOf(y[i]);
+    tabella[xi][yi]++;
+  }
+
+  // 4. Calcola i totali di riga e colonna
+  const totaliRiga = tabella.map(riga => riga.reduce((sum, val) => sum + val, 0));
+  const totaliColonna = Array(categorieY.length).fill(0);
+  for (let j = 0; j < categorieY.length; j++) {
+    for (let i = 0; i < categorieX.length; i++) {
+      totaliColonna[j] += tabella[i][j];
+    }
+  }
+
+  // Totale generale
+  const totaleGenerale = totaliRiga.reduce((acc, val) => acc + val, 0);
+
+  // 5. Costruisci HTML per la tabella
+  let html = `<h3>Tabella a Doppia Entrata (Contingenza)</h3><table border="1" cellpadding="5"><tr><th>X \\ Y</th>`;
+  categorieY.forEach(catY => html += `<th>${catY}</th>`);
+  html += `<th>Totale</th></tr>`; // Aggiungi colonna Totale
+
+  for (let i = 0; i < categorieX.length; i++) {
+    html += `<tr><th>${categorieX[i]}</th>`;
+    for (let j = 0; j < categorieY.length; j++) {
+      html += `<td>${tabella[i][j]}</td>`;
+    }
+    html += `<td>${totaliRiga[i]}</td></tr>`; // Aggiungi totale di riga
+  }
+
+  // Totali di colonna + Totale generale
+  html += `<tr><th>Totale</th>`;
+  for (let j = 0; j < categorieY.length; j++) {
+    html += `<td>${totaliColonna[j]}</td>`;
+  }
+  html += `<td>${totaleGenerale}</td></tr>`; // Aggiungi totale di colonna e totale generale
+
+  html += `</table><br>`;
+
+  // 6. Mostra la tabella nel div risultato
+  document.getElementById('risultato').innerHTML = html;
+
+  if (window.MathJax) {
+    MathJax.typesetPromise();
+  }
+}
+
+
+
+    function resetTutto() {
+      x = [];
+      y = [];
+      n = 0;
+      document.getElementById('valoriForm').reset();
+      document.getElementById('inputContainer').innerHTML = '';
+      document.getElementById('risultato').innerHTML = '';
+      document.getElementById('errore').textContent = '';
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelector('.tab').classList.add('active');
+      document.getElementById('descrittiva').classList.add('active');
+      document.getElementById('tabHeader').classList.add('hidden');
+      document.getElementById('valoriForm').classList.add('hidden');
+    }
+
+    // Tema
+    document.getElementById('toggleTheme').addEventListener('click', () => {
+      document.body.classList.toggle('dark-theme');
+      document.body.classList.toggle('light-theme');
+      document.getElementById('toggleTheme').textContent =
+        document.body.classList.contains('dark-theme') ? '🌙 Cambia tema' : '☀️ Cambia tema';
+    });
+
+    function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  sidebar.classList.toggle('open');
+}
+  </script>
+
+  <b><p class="scritta-fissa" onclick="toggleSidebar()">Tutorial</p></b>
+<div id="sidebar" class="sidebar">
+  <button class="sidebar-close" onclick="toggleSidebar()">×</button>
+  <h2>Tutorial</h2>
+  <ul>
+
+<li>Inserire i valori nella casella corrispondente</li><br>
+<li>Cliccare su Genera (non verranno accettati i valori: 0 o numeri negativi)</li><br>
+<li>Verranno generate tante caselle corrispondenti quanto abbiamo decretato prima</li><br>
+<li>Inserire i valori nelle X e nelle Y</li><br>
+<li>Dopo che tutti i valori sono inseriti il programma funzionerà</li><br>
+<li>Scegliere quale calcolo fargli fare e cliccare il pulsante corrispondente</li><br><br>
+</ul>
+<p>IMPORTANTE</p>
+<p>I VALORI NON SI AGGIORNANO IN TEMPO REALE!</p>
+<p>Se si vogliono cambiare i valori, per vedere i risultati aggiornati bisogna ricliccare sul pulsante scelto</p>
+<p>Esempio: <br>Ho calcolato la tabella, voglio cambiargli i valori all'interno <br>Cambio i valori delle X o delle Y <br>Riclicco su tabella <br>Solamente dopo ciò si vedranno i cambiamenti... </p>
+
+</div>
+<div class="scritta">
+<p style="font-size:30px; position: relative; top: 30px;">Crediti</p>
+<p>Autore: qlxmn <br> Contributo: Sol</p>
+</div>
+</body>
+</html>

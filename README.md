@@ -4,7 +4,7 @@ PROVA LA NUOVA VERSIONE (1.1.0)!!! https://qlxmn.github.io/Calcoli-statistici-tr
 Programma in html, utilizzato per studio scolastico, e facilitamento dei calcoli, con funzione di calcolo dati statistici fra X ed Y come: Media/Moda/Mediana, Variazione/Scarto,  Deviazione etc...
 
 Il programma è stato fatto da 2 studenti di 4^a superiore [Antonio Meucci, cittadella (PD)]
-Con il supplemento di: ChatGPT, Deepseek e BlackBoxAI, per funzioni non ancora studiate.
+Con il supplemento di: ChatGPT, Deepseek e Gemini, per funzioni non ancora studiate.
 
 Funzionalità principale, verificare i calcoli effettuali e fare calcoli semplici di statistica BASE.
 

@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+
   <meta charset="UTF-8">
   <title>Statistica X/Y</title>
   <link rel="stylesheet" href="style.css">
@@ -29,8 +33,8 @@
     }
 
     .tab.active {
-      border-bottom: 3px solid #4CAF50;
-      color: #4CAF50;
+      border-bottom: 3px solid #D4AF37;
+      color: #D4AF37;
     }
 
     .tab-content {
@@ -43,6 +47,117 @@
     }
 
     .error { color: red; font-weight: bold; margin-top: 10px; }
+
+    /* Nuovi stili per il pulsante espandibile */
+    body { margin: 0; min-height: 100vh; }
+
+   .expand-wrapper {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+}
+
+.expand-btn {
+    width: 120px;
+    height: 50px;
+    background: #333; /* Colore di sfondo per tema scuro/default */
+    color: white; /* Colore testo per tema scuro/default */
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    transition: background 0.3s;
+    padding: 10px;
+}
+
+.content {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: #222; /* Colore di sfondo per tema scuro/default */
+    color: white; /* Colore testo per tema scuro/default */
+    border-radius: 15px;
+    padding: 20px;
+    min-width: 340px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    transform-origin: top right;
+    transform: scale(0);
+    opacity: 0;
+    transition: transform 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.5s ease;
+}
+
+.expand-wrapper.expanded .content {
+    transform: scale(1) translate(-10px, 0);
+    opacity: 1;
+}
+
+/* Nascondi il pulsante iniziale quando espanso */
+.expand-wrapper.expanded .expand-btn {
+    display: none;
+}
+
+.close-btn {
+    display: none;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255,255,255,0.2); /* Sfondo default/tema scuro */
+    border: 2px solid white; /* Bordo default/tema scuro */
+    color: white; /* Colore testo default/tema scuro */
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: transform 0.2s, background 0.2s, color 0.2s, border-color 0.2s; /* Aggiunta transizione per colore e bordo */
+    z-index: 2;
+}
+
+.expand-wrapper.expanded .close-btn { display: block; }
+
+.close-btn:hover {
+    transform: scale(1.2);
+    background: rgba(255,255,255,0.4); /* Sfondo hover default/tema scuro */
+    /* Il colore del testo di default (bianco) rimarrà tale in hover,
+        a meno che non sia sovrascritto dalla regola del tema chiaro sotto */
+}
+
+.text-content { margin-top: 40px; }
+
+/* --- Modifiche per il .close-btn in TEMA CHIARO --- */
+
+/* Stile base del .close-btn quando il tema chiaro è attivo */
+body.light-theme .close-btn {
+    background: rgba(0,0,0,0.05); /* Sfondo leggero per tema chiaro */
+    border: 2px solid #888;       /* Bordo grigio per tema chiaro */
+    color: #333;                  /* Testo scuro (#333) per tema chiaro (stato base) */
+}
+
+/* Stile hover del .close-btn quando il tema chiaro è attivo */
+body.light-theme .close-btn:hover {
+    background: rgba(0,0,0,0.1);   /* Sfondo hover leggermente più scuro per tema chiaro */
+    color: #222;                   /* << DOVREBBE IMPOSTARE IL COLORE TESTO A #222 IN HOVER */
+    border-color: #555;            /* Bordo hover più scuro per tema chiaro */
+}
+/* Opzionale: se vuoi che anche il pulsante .expand-btn e il .content cambino con il tema chiaro */
+body.light-theme .expand-btn {
+    background: #E0E0E0; /* Esempio: grigio chiaro per il pulsante di espansione */
+    color: #333; /* Testo scuro */
+}
+
+body.light-theme .content {
+    background: #F5F5F5; /* Esempio: un bianco sporco per il contenuto espanso */
+    color: #333; /* Testo scuro */
+}
+
+    .text-content { margin-top: 40px; }
+
+    .scritta {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        color: #888;
+        font-size: 14px;
+    }
   </style>
 
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
@@ -58,15 +173,16 @@
 
     <label>Quanti valori vuoi inserire?</label>
     <input type="number" id="numValues" min="1">
-    <button onclick="generaInput()">Genera</button>
+    <button onclick="generaInput()">🐤 Genera</button>
+    <button type="button" onclick="resetTutto()">🐦‍🔥 Reset</button>
 
     <form id="valoriForm" class="hidden">
       <div id="inputContainer"></div>
 
       <div class="tabs hidden" id="tabHeader">
-        <button type="button" class="tab active" onclick="showTab('descrittiva')">📊 Descrittiva</button>
-        <button type="button" class="tab" onclick="showTab('regressione')">📈 Regressione</button>
-        <button type="button" class="tab" onclick="showTab('correlazione')">🔗 Correlazione</button>
+        <button type="button" class="tab active" onclick="showTab('descrittiva'); document.getElementById('risultato').innerHTML = ''">📊 Descrittiva</button>
+        <button type="button" class="tab" onclick="showTab('regressione'); document.getElementById('risultato').innerHTML = ''">📈 Regressione</button>
+        <button type="button" class="tab" onclick="showTab('correlazione'); document.getElementById('risultato').innerHTML = ''">🔗 Correlazione</button>
       </div>
 
       <div class="tab-content active" id="descrittiva">
@@ -75,14 +191,14 @@
         <button type="button" onclick="calcolaDeviazioni()">Deviazioni standard</button>
         <button type="button" onclick="calcolaDispersione()">Variazione e Scarto</button>
         <button type="button" onclick="generaTabellaContingenza()">Tabella</button>
-    
+
 
       </div>
 
       <div class="tab-content" id="regressione">
         <button type="button" onclick="calcolaA()">Coefficiente a</button>
         <button type="button" onclick="calcolaB()">Coefficiente b</button>
-        <button type="button" onclick="calcolaChiQuadrato()">χ² e C</button>
+      <!--  <button type="button" onclick="calcolaChiQuadrato()">χ² e C</button> -->
       </div>
 
       <div class="tab-content" id="correlazione">
@@ -92,7 +208,6 @@
       </div>
 
       <div style="margin-top:1rem;">
-        <button type="button" onclick="resetTutto()">🔄 Reset</button>
       </div>
     </form>
 
@@ -145,10 +260,9 @@
         document.getElementById('errore').textContent = 'Tutti i campi devono essere compilati con numeri.';
         throw new Error("Dati incompleti");
       }
-
       document.getElementById('errore').textContent = '';
-      mediaX = media(x);
-      mediaY = media(y);
+      mediaX = media(x); // Calcolo mediaX qui se necessario globalmente
+      mediaY = media(y); // Calcolo mediaY qui se necessario globalmente
     }
 
     function media(arr) {
@@ -170,60 +284,64 @@
     }
 
     function calcolaMediaMedianaModa() {
-  try {
-    leggiValori();
+      try {
+        leggiValori();
 
-    const medianaX = mediana(x);
-    const medianaY = mediana(y);
-    const modaX = moda(x);
-    const modaY = moda(y);
+        const medianaX = mediana(x);
+        const medianaY = mediana(y);
+        const modaX = moda(x);
+        const modaY = moda(y);
 
-    document.getElementById('risultato').innerHTML = `
-      <h3>Mediana e Moda</h3>
-      <b>X:</b> mediana = ${medianaX}, moda = ${modaX}<br>
-      <b>Y:</b> mediana = ${medianaY}, moda = ${modaY}
-    `;
-  } catch {}
-}
-
-function calcolaPearsonER2() {
-  try {
-    leggiValori();
-    const n = x.length;
-    if (n !== y.length || n === 0) {
-      throw new Error("Gli array devono avere la stessa lunghezza e non essere vuoti.");
+        document.getElementById('risultato').innerHTML = `
+          <h3>Mediana e Moda</h3>
+          X: mediana = ${medianaX}, moda = ${modaX}<br>
+          Y: mediana = ${medianaY}, moda = ${modaY}
+        `;
+      } catch (e) {
+          document.getElementById('errore').textContent = e.message;
+      }
     }
 
-    const mediaX = x.reduce((acc, val) => acc + val, 0) / n;
-    const mediaY = y.reduce((acc, val) => acc + val, 0) / n;
+    function calcolaPearsonER2() {
+      try {
+        leggiValori();
+        const n_local = x.length; // Usa una variabile locale per n se leggiValori() non aggiorna la n globale
+        if (n_local !== y.length || n_local === 0) {
+          throw new Error("Gli array devono avere la stessa lunghezza e non essere vuoti.");
+        }
 
-    let sommaXY = 0, sommaX2 = 0, sommaY2 = 0;
-    for (let i = 0; i < n; i++) {
-      const dx = x[i] - mediaX;
-      const dy = y[i] - mediaY;
-      sommaXY += dx * dy;
-      sommaX2 += dx * dx;
-      sommaY2 += dy * dy;
+        const mediaX_local = x.reduce((acc, val) => acc + val, 0) / n_local;
+        const mediaY_local = y.reduce((acc, val) => acc + val, 0) / n_local;
+
+        let sommaXY = 0, sommaX2 = 0, sommaY2 = 0;
+        for (let i = 0; i < n_local; i++) {
+          const dx = x[i] - mediaX_local;
+          const dy = y[i] - mediaY_local;
+          sommaXY += dx * dy;
+          sommaX2 += dx * dx;
+          sommaY2 += dy * dy;
+        }
+
+        const denominator = Math.sqrt(sommaX2 * sommaY2);
+        if (denominator === 0) {
+            throw new Error("Impossibile calcolare Pearson: la varianza di X o Y è zero.");
+        }
+        const r = sommaXY / denominator;
+        const r2 = r * r;
+
+        document.getElementById('risultato').innerHTML = `
+          <h3>Coefficiente di Pearson e R²</h3>
+          r = ${r.toFixed(4)}<br>
+          R² = ${r2.toFixed(4)}
+        `;
+      } catch(e) {
+        document.getElementById('errore').textContent = 'Errore nel calcolo: ' + e.message;
+      }
     }
-
-    const r = sommaXY / Math.sqrt(sommaX2 * sommaY2);
-    const r2 = r * r;
-
-    document.getElementById('risultato').innerHTML = `
-      <h3>Coefficiente di Pearson e R²</h3>
-      r = ${r.toFixed(4)}<br>
-      R² = ${r2.toFixed(4)}
-    `;
-  } catch(e) {
-    document.getElementById('errore').textContent = 'Errore nel calcolo: ' + e.message;
-  }
-}
-
-
 
     function calcolaDeviazioni() {
       try {
-        leggiValori();
+        leggiValori(); // Assicura che n, mediaX, mediaY siano aggiornati
         sigmaX = Math.sqrt(x.reduce((acc, xi) => acc + Math.pow(xi - mediaX, 2), 0) / n);
         sigmaY = Math.sqrt(y.reduce((acc, yi) => acc + Math.pow(yi - mediaY, 2), 0) / n);
 
@@ -232,12 +350,14 @@ function calcolaPearsonER2() {
           σₓ = ${sigmaX.toFixed(4)}<br>
           σᵧ = ${sigmaY.toFixed(4)}
         `;
-      } catch {}
+      } catch (e) {
+          document.getElementById('errore').textContent = e.message;
+      }
     }
 
     function calcolaVarianza() {
       try {
-        leggiValori();
+        leggiValori(); // Assicura che n, mediaX, mediaY siano aggiornati
         const varX = x.reduce((acc, xi) => acc + Math.pow(xi - mediaX, 2), 0) / n;
         const varY = y.reduce((acc, yi) => acc + Math.pow(yi - mediaY, 2), 0) / n;
 
@@ -246,241 +366,396 @@ function calcolaPearsonER2() {
           Var(X) = ${varX.toFixed(4)}<br>
           Var(Y) = ${varY.toFixed(4)}
         `;
-      } catch {}
+      } catch (e) {
+          document.getElementById('errore').textContent = e.message;
+      }
     }
 
     function calcolaCovarianza() {
       try {
-        leggiValori();
+        leggiValori(); // Assicura che n, mediaX, mediaY siano aggiornati
         covXY = x.reduce((acc, xi, i) => acc + (xi - mediaX) * (y[i] - mediaY), 0) / n;
-        sigmaX = Math.sqrt(x.reduce((acc, xi) => acc + Math.pow(xi - mediaX, 2), 0) / n); // calcolo sigmaX
-        sigmaY = Math.sqrt(y.reduce((acc, yi) => acc + Math.pow(yi - mediaY, 2), 0) / n); // calcolo sigmaY
-        
+        sigmaX = Math.sqrt(x.reduce((acc, xi) => acc + Math.pow(xi - mediaX, 2), 0) / n); 
+        sigmaY = Math.sqrt(y.reduce((acc, yi) => acc + Math.pow(yi - mediaY, 2), 0) / n); 
+
         document.getElementById('risultato').innerHTML = `
           <h3>Covarianza</h3>
           σₓᵧ = ${covXY.toFixed(4)}<br>
           σₓ = ${sigmaX.toFixed(4)}<br>
           σᵧ = ${sigmaY.toFixed(4)}
         `;
-      } catch {}
+      } catch (e) {
+          document.getElementById('errore').textContent = e.message;
+      }
     }
 
     function calcolaB() {
       try {
-        leggiValori();
+        leggiValori(); // Assicura che n, mediaX, mediaY siano aggiornati
         const num = x.reduce((acc, xi, i) => acc + (xi - mediaX) * (y[i] - mediaY), 0);
         const den = y.reduce((acc, yi) => acc + Math.pow(yi - mediaY, 2), 0);
+        if (den === 0) {
+            throw new Error("Impossibile calcolare 'b': la somma dei quadrati degli scarti di Y è zero.");
+        }
         b = num / den;
 
         document.getElementById('risultato').innerHTML = `
           <h3>Coefficiente b (regressione)</h3>
           b = ${b.toFixed(4)}
         `;
-      } catch {}
+      } catch (e) {
+          document.getElementById('errore').textContent = e.message;
+      }
     }
 
     function calcolaA() {
       try {
-        leggiValori();
+        leggiValori(); // Assicura che n, mediaX, mediaY siano aggiornati
         const num = x.reduce((acc, xi, i) => acc + (xi - mediaX) * (y[i] - mediaY), 0);
         const den = x.reduce((acc, xi) => acc + Math.pow(xi - mediaX, 2), 0);
+        if (den === 0) {
+            throw new Error("Impossibile calcolare 'a': la somma dei quadrati degli scarti di X è zero.");
+        }
         a = num / den;
 
         document.getElementById('risultato').innerHTML = `
           <h3>Coefficiente a (interpolazione)</h3>
           a = ${a.toFixed(4)}
         `;
-      } catch {}
+      } catch (e) {
+          document.getElementById('errore').textContent = e.message;
+      }
     }
 
-function calcolaMedieComplesse() {
-  leggiValori(); // Deve riempire x, y e n
+    function calcolaMedieComplesse() {
+        try {
+            leggiValori(); // Riempie x, y e aggiorna n, mediaX, mediaY globali
 
-  // Funzione di supporto: media aritmetica semplice
-  const media = arr => arr.reduce((a, b) => a + b, 0) / arr.length;
+            // Media aritmetica (usa mediaX, mediaY già calcolate in leggiValori)
+            const mediaAritmeticaX = mediaX;
+            const mediaAritmeticaY = mediaY;
 
-  // Media aritmetica
-  const mediaAritmeticaX = media(x);
-  const mediaAritmeticaY = media(y);
+            // Frequenze come pesi
+            const frequenzeX = {};
+            const frequenzeY = {};
+            x.forEach(xi => frequenzeX[xi] = (frequenzeX[xi] || 0) + 1);
+            y.forEach(yi => frequenzeY[yi] = (frequenzeY[yi] || 0) + 1);
 
-  // Frequenze come pesi (es: 5 appare 3 volte → peso = 3)
-  const frequenzeX = {};
-  const frequenzeY = {};
-  x.forEach(xi => frequenzeX[xi] = (frequenzeX[xi] || 0) + 1);
-  y.forEach(yi => frequenzeY[yi] = (frequenzeY[yi] || 0) + 1);
+            // Media ponderata con pesi = frequenze
+            const pesoTotaleX = Object.values(frequenzeX).reduce((acc, freq) => acc + freq, 0);
+            const pesoTotaleY = Object.values(frequenzeY).reduce((acc, freq) => acc + freq, 0);
+            const mediaPonderataX = x.reduce((acc, xi) => acc + xi * frequenzeX[xi], 0) / pesoTotaleX;
+            const mediaPonderataY = y.reduce((acc, yi) => acc + yi * frequenzeY[yi], 0) / pesoTotaleY;
+            
+            let mediaGeometricaXOutput, mediaGeometricaYOutput;
+            let mediaArmonicaXOutput, mediaArmonicaYOutput;
 
-  // Media ponderata con pesi = frequenze
-  const pesoTotaleX = x.reduce((acc, xi) => acc + frequenzeX[xi], 0);
-  const pesoTotaleY = y.reduce((acc, yi) => acc + frequenzeY[yi], 0);
-  const mediaPonderataX = x.reduce((acc, xi) => acc + xi * frequenzeX[xi], 0) / pesoTotaleX;
-  const mediaPonderataY = y.reduce((acc, yi) => acc + yi * frequenzeY[yi], 0) / pesoTotaleY;
+            // Media geometrica
+            if (x.some(val => val <= 0)) {
+                mediaGeometricaXOutput = '<span style="color:red;">Impossibile: valori ≤ 0 in X</span>';
+            } else {
+                const prodottoX = x.reduce((acc, xi) => acc * xi, 1);
+                mediaGeometricaXOutput = Math.pow(prodottoX, 1 / n).toFixed(4);
+            }
+            if (y.some(val => val <= 0)) {
+                mediaGeometricaYOutput = '<span style="color:red;">Impossibile: valori ≤ 0 in Y</span>';
+            } else {
+                const prodottoY = y.reduce((acc, yi) => acc * yi, 1);
+                mediaGeometricaYOutput = Math.pow(prodottoY, 1 / n).toFixed(4);
+            }
 
-  // Media geometrica
-  const prodottoX = x.reduce((acc, xi) => acc * xi, 1);
-  const prodottoY = y.reduce((acc, yi) => acc * yi, 1);
-  const mediaGeometricaX = Math.pow(prodottoX, 1 / n);
-  const mediaGeometricaY = Math.pow(prodottoY, 1 / n);
+            // Media armonica
+            if (x.includes(0)) {
+                mediaArmonicaXOutput = '<span style="color:red;">Impossibile: valore 0 in X</span>';
+            } else {
+                const sommaInversiX = x.reduce((acc, xi) => acc + 1 / xi, 0);
+                mediaArmonicaXOutput = (n / sommaInversiX).toFixed(4);
+            }
+            if (y.includes(0)) {
+                mediaArmonicaYOutput = '<span style="color:red;">Impossibile: valore 0 in Y</span>';
+            } else {
+                const sommaInversiY = y.reduce((acc, yi) => acc + 1 / yi, 0);
+                mediaArmonicaYOutput = (n / sommaInversiY).toFixed(4);
+            }
 
-  // Media armonica
-  const sommaInversiX = x.reduce((acc, xi) => acc + 1 / xi, 0);
-  const sommaInversiY = y.reduce((acc, yi) => acc + 1 / yi, 0);
-  const mediaArmonicaX = n / sommaInversiX;
-  const mediaArmonicaY = n / sommaInversiY;
+            // Media quadratica
+            const sommaQuadratiX = x.reduce((acc, xi) => acc + xi * xi, 0);
+            const sommaQuadratiY = y.reduce((acc, yi) => acc + yi * yi, 0);
+            const mediaQuadraticaX = Math.sqrt(sommaQuadratiX / n).toFixed(4);
+            const mediaQuadraticaY = Math.sqrt(sommaQuadratiY / n).toFixed(4);
 
-  // Media quadratica
-  const sommaQuadratiX = x.reduce((acc, xi) => acc + xi * xi, 0);
-  const sommaQuadratiY = y.reduce((acc, yi) => acc + yi * yi, 0);
-  const mediaQuadraticaX = Math.sqrt(sommaQuadratiX / n);
-  const mediaQuadraticaY = Math.sqrt(sommaQuadratiY / n);
+            // Stringa leggibile per i pesi
+            const pesiXStr = Object.entries(frequenzeX).map(([val, peso]) => `${val}: ${peso}`).join(", ");
+            const pesiYStr = Object.entries(frequenzeY).map(([val, peso]) => `${val}: ${peso}`).join(", ");
 
-  // Stringa leggibile per i pesi
-  const pesiXStr = Object.entries(frequenzeX).map(([val, peso]) => `${val}: ${peso}`).join(", ");
-  const pesiYStr = Object.entries(frequenzeY).map(([val, peso]) => `${val}: ${peso}`).join(", ");
+            // Output nel DOM
+            document.getElementById('risultato').innerHTML = `
+                <h3>Medie Complesse</h3>
+                Media aritmetica: X = ${mediaAritmeticaX.toFixed(4)}, Y = ${mediaAritmeticaY.toFixed(4)}<br><br>
+                Media ponderata (per frequenze): X = ${mediaPonderataX.toFixed(4)}, Y = ${mediaPonderataY.toFixed(4)}<br>
+                <i>Pesi (frequenze) X:</i> ${pesiXStr}<br>
+                <i>Pesi (frequenze) Y:</i> ${pesiYStr}<br><br>
+                Media geometrica:X = ${mediaGeometricaXOutput}, Y = ${mediaGeometricaYOutput}<br><br>
+                Media armonica: X = ${mediaArmonicaXOutput}, Y = ${mediaArmonicaYOutput}<br><br>
+                Media quadratica: X = ${mediaQuadraticaX}, Y = ${mediaQuadraticaY}<br><br>
+            `;
 
-  // Output nel DOM
-  document.getElementById('risultato').innerHTML = `
-    <h3>Medie Complesse</h3>
-    <b>Media aritmetica:</b> X = ${mediaAritmeticaX.toFixed(4)}, Y = ${mediaAritmeticaY.toFixed(4)}<br><br>
-    <b>Media ponderata (per frequenze):</b> X = ${mediaPonderataX.toFixed(4)}, Y = ${mediaPonderataY.toFixed(4)}<br>
-    <b>Pesi (frequenze) X:</b> ${pesiXStr}<br>
-    <b>Pesi (frequenze) Y:</b> ${pesiYStr}<br><br>
-    <b>Media geometrica:</b> X = ${mediaGeometricaX.toFixed(4)}, Y = ${mediaGeometricaY.toFixed(4)}<br><br>
-    <b>Media armonica:</b> X = ${mediaArmonicaX.toFixed(4)}, Y = ${mediaArmonicaY.toFixed(4)}<br><br>
-    <b>Media quadratica:</b> X = ${mediaQuadraticaX.toFixed(4)}, Y = ${mediaQuadraticaY.toFixed(4)}<br><br>
-  `;
-
-  // Rendering formule matematiche (se usi MathJax)
-  if (window.MathJax) {
-    MathJax.typesetPromise();
-  }
-}
-
-
-
-function calcolaChiQuadrato() {
-  leggiValori();
-  // Supponiamo che x siano i valori osservati e y quelli attesi
-  let chi2 = 0;
-  for (let i = 0; i < n; i++) {
-    if (y[i] !== 0) { // evita divisione per zero
-      chi2 += Math.pow(x[i] - y[i], 2) / y[i];
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        } catch (e) {
+            document.getElementById('errore').textContent = e.message;
+        }
     }
-  }
 
-  // Chi quadrato normalizzato = chi² / n
-  const chi2Normalizzato = chi2 / n;
 
-  // Sovrascrive il contenuto del div risultato
-  document.getElementById('risultato').innerHTML = `
-    <h3>Test Chi Quadrato</h3>
-    <b>Chi quadrato (χ²):</b> ${chi2.toFixed(4)}<br>
-    <b>Chi quadrato normalizzato:</b> ${chi2Normalizzato.toFixed(4)}<br><br>
-  `;
+/*
+  function calcolaChiQuadrato() {
+  try {
+    leggiValori(); // Popola x, y e n
 
-  if (window.MathJax) {
-    MathJax.typesetPromise();
-  }
-}
-
-function calcolaDispersione() {
-  leggiValori();
-  // Calcola campo di variazione per X e Y
-  const campoX = Math.max(...x) - Math.min(...x);
-  const campoY = Math.max(...y) - Math.min(...y);
-
-  // Media aritmetica (serve per scarto semplice medio)
-  const mediaX = media(x);
-  const mediaY = media(y);
-
-  // Scarto semplice medio = media degli scarti assoluti
-  const scartoX = x.reduce((acc, xi) => acc + Math.abs(xi - mediaX), 0) / n;
-  const scartoY = y.reduce((acc, yi) => acc + Math.abs(yi - mediaY), 0) / n;
-
-  // Mostra risultati (sovrascrive)
-  document.getElementById('risultato').innerHTML = `
-    <h3>Misure di Dispersione</h3>
-    <b>Campo di variazione:</b> X = ${campoX}, Y = ${campoY}<br>
-    <b>Scarto semplice medio:</b> X = ${scartoX.toFixed(4)}, Y = ${scartoY.toFixed(4)}<br><br>
-  `;
-
-  if (window.MathJax) {
-    MathJax.typesetPromise();
-  }
-}
-
-function generaTabellaContingenza() {
-  leggiValori();
-  // 1. Ottieni le categorie distinte
-  const categorieX = [...new Set(x)].sort((a, b) => a - b);
-  const categorieY = [...new Set(y)].sort((a, b) => a - b);
-
-  // 2. Crea matrice contingenza (righe: x, colonne: y)
-  const tabella = Array.from({ length: categorieX.length }, () =>
-    Array(categorieY.length).fill(0)
-  );
-
-  // 3. Popola la matrice: conta le occorrenze
-  for (let i = 0; i < n; i++) {
-    const xi = categorieX.indexOf(x[i]);
-    const yi = categorieY.indexOf(y[i]);
-    tabella[xi][yi]++;
-  }
-
-  // 4. Calcola i totali di riga e colonna
-  const totaliRiga = tabella.map(riga => riga.reduce((sum, val) => sum + val, 0));
-  const totaliColonna = Array(categorieY.length).fill(0);
-  for (let j = 0; j < categorieY.length; j++) {
-    for (let i = 0; i < categorieX.length; i++) {
-      totaliColonna[j] += tabella[i][j];
+    // Verifica che ci siano dati
+    if (x.length !== y.length || x.length === 0) {
+      throw new Error("Errore: gli array X e Y devono avere la stessa lunghezza e non essere vuoti.");
     }
-  }
 
-  // Totale generale
-  const totaleGenerale = totaliRiga.reduce((acc, val) => acc + val, 0);
+    // Costruisci categorie ordinate
+    const categorieX = [...new Set(x)].sort((a, b) => a - b);
+    const categorieY = [...new Set(y)].sort((a, b) => a - b);
 
-  // 5. Costruisci HTML per la tabella
-  let html = `<h3>Tabella a Doppia Entrata (Contingenza)</h3><table border="1" cellpadding="5"><tr><th>X \\ Y</th>`;
-  categorieY.forEach(catY => html += `<th>${catY}</th>`);
-  html += `<th>Totale</th></tr>`; // Aggiungi colonna Totale
+    const numRows = categorieX.length;
+    const numCols = categorieY.length;
 
-  for (let i = 0; i < categorieX.length; i++) {
-    html += `<tr><th>${categorieX[i]}</th>`;
-    for (let j = 0; j < categorieY.length; j++) {
-      html += `<td>${tabella[i][j]}</td>`;
+    // Inizializza tabella osservata
+    const tabellaOsservata = Array.from({ length: numRows }, () =>
+      Array(numCols).fill(0)
+    );
+
+    // Popola contingenza (frequenze osservate)
+    for (let i = 0; i < x.length; i++) {
+      const iX = categorieX.indexOf(x[i]);
+      const iY = categorieY.indexOf(y[i]);
+      if (iX !== -1 && iY !== -1) { // Assicura che i valori siano categorie valide
+          tabellaOsservata[iX][iY]++;
+      }
     }
-    html += `<td>${totaliRiga[i]}</td></tr>`; // Aggiungi totale di riga
+
+    // Totali di riga e colonna
+    const totaliRiga = tabellaOsservata.map(r => r.reduce((s, v) => s + v, 0));
+    const totaliColonna = categorieY.map((_, j) =>
+      tabellaOsservata.reduce((s, r) => s + r[j], 0)
+    );
+    const totaleGenerale = totaliRiga.reduce((s, v) => s + v, 0);
+
+    if (totaleGenerale === 0) {
+        throw new Error("Errore: il totale generale delle osservazioni è zero.");
+    }
+
+    // Calcola Chi Quadrato (χ²)
+    // La logica seguente implementa la funzione chiSquareTest concettualmente
+    let chi2 = 0;
+    for (let i = 0; i < numRows; i++) {
+      for (let j = 0; j < numCols; j++) {
+        const O = tabellaOsservata[i][j];
+        // Frequenza attesa E = (Totale Riga * Totale Colonna) / Totale Generale
+        const E = (totaliRiga[i] * totaliColonna[j]) / totaleGenerale;
+        if (E === 0) {
+            // Se la frequenza attesa è 0, il contributo a chi2 è 0.
+            // Se O è > 0 e E è 0, questo indica un problema (es. categorie con totali zero)
+            // o che le categorie non sono presenti in entrambi gli array.
+            // In una vera applicazione statistica si potrebbe voler gestire questo caso.
+            // Qui, per semplicità, saltiamo la divisione per zero come nel codice originale.
+            continue; 
+        }
+        // Aggiunge il contributo del singolo elemento alla somma Chi Quadrato: (O - E)^2 / E
+        chi2 += Math.pow(O - E, 2) / E;
+      }
+    }
+
+    // Calcola il Coefficiente V di Cramer
+    let cramersV = 0;
+    const minDim = Math.min(numRows - 1, numCols - 1);
+    if (totaleGenerale > 0 && minDim > 0) {
+        cramersV = Math.sqrt((chi2 / totaleGenerale) / minDim);
+    } else if (chi2 > 0 && (totaleGenerale === 0 || minDim === 0)) {
+         // Se chi2 > 0 ma non si può calcolare Cramer's V
+         console.warn("Impossibile calcolare Cramer's V: totale osservazioni zero o una dimensione = 1.");
+         cramersV = NaN; // O un altro indicatore che non può essere calcolato
+    }
+
+
+    // Stampa risultato
+    document.getElementById('risultato').innerHTML = `
+      <h3>Test Chi Quadrato per Indipendenza e V di Cramer</h3>
+      Chi quadrato (χ²): ${chi2.toFixed(4)}<br>
+      Coefficiente V di Cramer (C): ${cramersV.toFixed(4)}
+    `;
+
+    if (window.MathJax) {
+        // Usa MathJax per formattare le formule se necessario
+        // Ad esempio, per mostrare la formula del Chi Quadrato o di Cramer V:
+        // document.getElementById('risultato').innerHTML += `
+        // <p>Formula $\chi^2 = \sum \\frac{(O_{ij} - E_{ij})^2}{E_{ij}}$</p>
+        // <p>Formula $V = \\sqrt{\\frac{\\chi^2/n}{\\min(k-1, r-1)}}$</p>
+        // `;
+        MathJax.typesetPromise();
+    }
+  } catch (e) {
+    document.getElementById('errore').textContent = 'Errore nel calcolo del Chi Quadrato: ' + e.message;
   }
+}*/D
 
-  // Totali di colonna + Totale generale
-  html += `<tr><th>Totale</th>`;
-  for (let j = 0; j < categorieY.length; j++) {
-    html += `<td>${totaliColonna[j]}</td>`;
-  }
-  html += `<td>${totaleGenerale}</td></tr>`; // Aggiungi totale di colonna e totale generale
+    function calcolaDispersione() {
+      try {
+        leggiValori(); // Assicura che n, mediaX, mediaY siano aggiornati
+        const campoX = Math.max(...x) - Math.min(...x);
+        const campoY = Math.max(...y) - Math.min(...y);
 
-  html += `</table><br>`;
+        const scartoX = x.reduce((acc, xi) => acc + Math.abs(xi - mediaX), 0) / n;
+        const scartoY = y.reduce((acc, yi) => acc + Math.abs(yi - mediaY), 0) / n;
 
-  // 6. Mostra la tabella nel div risultato
-  document.getElementById('risultato').innerHTML = html;
+        document.getElementById('risultato').innerHTML = `
+          <h3>Misure di Dispersione</h3>
+          Campo di variazione: X = ${campoX}, Y = ${campoY}<br>
+          Scarto semplice medio: X = ${scartoX.toFixed(4)}, Y = ${scartoY.toFixed(4)}<br><br>
+        `;
 
-  if (window.MathJax) {
-    MathJax.typesetPromise();
-  }
-}
+        if (window.MathJax) {
+          MathJax.typesetPromise();
+        }
+      } catch (e) {
+          document.getElementById('errore').textContent = e.message;
+      }
+    }
 
+    function generaTabellaContingenza() {
+      try {
+        leggiValori(); 
+
+        const categorieX = [...new Set(x)].sort((a, b) => a - b);
+        const categorieY = [...new Set(y)].sort((a, b) => a - b);
+
+        const tabella = Array.from({ length: categorieX.length }, () =>
+          Array(categorieY.length).fill(0)
+        );
+
+        for (let i = 0; i < n; i++) {
+          const xi = categorieX.indexOf(x[i]);
+          const yi = categorieY.indexOf(y[i]);
+          if (xi !== -1 && yi !== -1) { // Assicura che il valore sia trovato nelle categorie
+            tabella[xi][yi]++;
+          }
+        }
+
+        const totaliRiga = tabella.map(riga => riga.reduce((sum, val) => sum + val, 0));
+        const totaliColonna = Array(categorieY.length).fill(0);
+        for (let j = 0; j < categorieY.length; j++) {
+          for (let i = 0; i < categorieX.length; i++) {
+            totaliColonna[j] += tabella[i][j];
+          }
+        }
+
+        const totaleGenerale = totaliRiga.reduce((acc, val) => acc + val, 0);
+
+        let html = `<h3>Tabella a Doppia Entrata (Contingenza)</h3><table border="1" cellpadding="5"><tr><th>X \\ Y</th>`;
+        categorieY.forEach(catY => html += `<th>${catY}</th>`);
+        html += `<th>Totale</th></tr>`;
+
+        for (let i = 0; i < categorieX.length; i++) {
+          html += `<tr><th>${categorieX[i]}</th>`;
+          for (let j = 0; j < categorieY.length; j++) {
+            html += `<td>${tabella[i][j]}</td>`;
+          }
+          html += `<td>${totaliRiga[i]}</td></tr>`;
+        }
+
+        html += `<tr><th>Totale</th>`;
+        for (let j = 0; j < categorieY.length; j++) {
+          html += `<td>${totaliColonna[j]}</td>`;
+        }
+        html += `<td>${totaleGenerale}</td></tr></table><br>`;
+
+        const attese = Array.from({ length: categorieX.length }, () =>
+          Array(categorieY.length).fill(0)
+        );
+        for (let i = 0; i < categorieX.length; i++) {
+          for (let j = 0; j < categorieY.length; j++) {
+            if (totaleGenerale === 0) throw new Error("Totale generale è zero, impossibile calcolare frequenze attese.");
+            attese[i][j] = (totaliRiga[i] * totaliColonna[j]) / totaleGenerale;
+          }
+        }
+
+        const differenze = Array.from({ length: categorieX.length }, () =>
+          Array(categorieY.length).fill(0)
+        );
+        for (let i = 0; i < categorieX.length; i++) {
+          for (let j = 0; j < categorieY.length; j++) {
+            differenze[i][j] = tabella[i][j] - attese[i][j];
+          }
+        }
+        
+        html += `<h3>Tabella delle Frequenze Attese</h3><table border="1" cellpadding="5"><tr><th>X \\ Y</th>`;
+        categorieY.forEach(catY => html += `<th>${catY}</th>`);
+        html += `</tr>`;
+        for (let i = 0; i < categorieX.length; i++) {
+          html += `<tr><th>${categorieX[i]}</th>`;
+          for (let j = 0; j < categorieY.length; j++) {
+            html += `<td>${attese[i][j].toFixed(2)}</td>`;
+          }
+          html += `</tr>`;
+        }
+        html += `</table><br>`;
+
+        html += `<h3>Tabella delle Differenze (Osservato - Atteso)</h3><table border="1" cellpadding="5"><tr><th>X \\ Y</th>`;
+        categorieY.forEach(catY => html += `<th>${catY}</th>`);
+        html += `</tr>`;
+        for (let i = 0; i < categorieX.length; i++) {
+          html += `<tr><th>${categorieX[i]}</th>`;
+          for (let j = 0; j < categorieY.length; j++) {
+            html += `<td>${differenze[i][j].toFixed(2)}</td>`;
+          }
+          html += `</tr>`;
+        }
+        html += `</table><br>`;
+
+        document.getElementById('risultato').innerHTML = html;
+
+        if (window.MathJax) {
+          MathJax.typesetPromise();
+        }
+      } catch (e) {
+          document.getElementById('errore').textContent = e.message;
+      }
+    }
 
 
     function resetTutto() {
       x = [];
       y = [];
       n = 0;
-      document.getElementById('valoriForm').reset();
+      mediaX = 0; // Resetta anche le medie globali
+      mediaY = 0;
+      sigmaX = 0; 
+      sigmaY = 0;
+      covXY = 0;
+      a = 0;
+      b = 0;
+      document.getElementById('numValues').value = ''; // Pulisce l'input del numero di valori
+      document.getElementById('valoriForm').reset(); // Resetta i campi del form
       document.getElementById('inputContainer').innerHTML = '';
       document.getElementById('risultato').innerHTML = '';
       document.getElementById('errore').textContent = '';
+      
+      // Ripristina tab e contenuti
       document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-      document.querySelector('.tab').classList.add('active');
-      document.getElementById('descrittiva').classList.add('active');
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      
+      const descrittivaTab = document.querySelector('.tab[onclick*="descrittiva"]');
+      if (descrittivaTab) descrittivaTab.classList.add('active');
+      
+      const descrittivaContent = document.getElementById('descrittiva');
+      if (descrittivaContent) descrittivaContent.classList.add('active');
+      
       document.getElementById('tabHeader').classList.add('hidden');
       document.getElementById('valoriForm').classList.add('hidden');
     }
@@ -492,35 +767,62 @@ function generaTabellaContingenza() {
       document.getElementById('toggleTheme').textContent =
         document.body.classList.contains('dark-theme') ? '🌙 Cambia tema' : '☀️ Cambia tema';
     });
-
-    function toggleSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  sidebar.classList.toggle('open');
-}
   </script>
 
-  <b><p class="scritta-fissa" onclick="toggleSidebar()">Tutorial</p></b>
-<div id="sidebar" class="sidebar">
-  <button class="sidebar-close" onclick="toggleSidebar()">×</button>
-  <h2>Tutorial</h2>
-  <ul>
+  <div class="expand-wrapper" id="wrapper">
+      <button class="expand-btn" id="toggleBtn">🧭Tutorial</button>
+      <div class="content" id="contentBox">
+          <button class="close-btn" id="closeBtn">×</button>
+          <div class="text-content">
+              <h2>🧭 Tutorial</h2>
+              <ul>
+                  <li>Inserisci il numero di coppie di valori (X, Y) che vuoi analizzare nel campo "Quanti valori vuoi inserire?".</li><br>
+                  <li>Clicca su "<b>🐤 Genera</b>". Verranno create le caselle per inserire i dati.</li><br>
+                  <li>Compila i campi <b>X</b> e <b>Y</b> con i tuoi dati numerici. Puoi usare anche numeri decimali o negativi (alcuni calcoli specifici, come la media geometrica, potrebbero non essere validi con valori negativi o zero e mostreranno un avviso).</li><br>
+                  <li>Una volta inseriti tutti i valori, scegli la sezione di calcolo (Descrittiva, Regressione, Correlazione) e clicca sul pulsante dell'operazione desiderata.</li><br>
+                  <li>I risultati appariranno sotto i pulsanti.</li><br><br>
+              </ul>
+              <h2>⚠️ Importante</h2>
+              <p>I RISULTATI NON SI AGGIORNANO AUTOMATICAMENTE!</p>
+              <p>Se modifichi i dati dopo aver eseguito un calcolo, devi <b>cliccare nuovamente sul pulsante dell'operazione</b> per visualizzare i risultati aggiornati con i nuovi valori.</p>
+              <p>Usa il pulsante "<b>🐦‍🔥 Reset</b>" per cancellare tutti i dati inseriti, i risultati e resettare l'interfaccia.</p>
+          </div>
+      </div>
+  </div>
 
-<li>Inserire i valori nella casella corrispondente</li><br>
-<li>Cliccare su Genera (non verranno accettati i valori: 0 o numeri negativi)</li><br>
-<li>Verranno generate tante caselle corrispondenti quanto abbiamo decretato prima</li><br>
-<li>Inserire i valori nelle X e nelle Y</li><br>
-<li>Dopo che tutti i valori sono inseriti il programma funzionerà</li><br>
-<li>Scegliere quale calcolo fargli fare e cliccare il pulsante corrispondente</li><br><br>
-</ul>
-<p>IMPORTANTE</p>
-<p>I VALORI NON SI AGGIORNANO IN TEMPO REALE!</p>
-<p>Se si vogliono cambiare i valori, per vedere i risultati aggiornati bisogna ricliccare sul pulsante scelto</p>
-<p>Esempio: <br>Ho calcolato la tabella, voglio cambiargli i valori all'interno <br>Cambio i valori delle X o delle Y <br>Riclicco su tabella <br>Solamente dopo ciò si vedranno i cambiamenti... </p>
+<div class="scritta" style="position: fixed; bottom: 5px; left: 5px; width: max-content; height: auto; color: #464646;">
+  <button class="Credits" style=" border:none; cursor:pointer;"><p style="font-size:30px; margin: 0;">Crediti</p>
+  <p style="margin: 0;">Autore: qlxmn <img src="IMG/capybara.png" class="miniimg" alt="" style="height:1em; vertical-align:middle;"> <br>Contributo: Sol <img src="IMG/red-panda.png" class="miniimg" alt="" style="height:1em; vertical-align:middle;"></p></button>
+</div>
 
-</div>
-<div class="scritta">
-<p style="font-size:30px; position: relative; top: 30px;">Crediti</p>
-<p>Autore: qlxmn <br> Contributo: Sol</p>
-</div>
+
+
+  <script>
+    // Script per il nuovo pulsante espandibile
+    const wrapper = document.getElementById('wrapper');
+    const toggleBtn = document.getElementById('toggleBtn');
+    const closeBtn = document.getElementById('closeBtn');
+
+    function expand() {
+        wrapper.classList.add('expanded');
+        document.addEventListener('click', clickOutside);
+    }
+    function collapse() {
+        wrapper.classList.remove('expanded');
+        document.removeEventListener('click', clickOutside);
+    }
+    function toggle(event) {
+        event.stopPropagation();
+        wrapper.classList.contains('expanded') ? collapse() : expand();
+    }
+    function clickOutside(event) {
+        if (wrapper && !wrapper.contains(event.target)) collapse();
+    }
+
+    if (toggleBtn) toggleBtn.addEventListener('click', toggle);
+    if (closeBtn) closeBtn.addEventListener('click', function(event) {
+        event.stopPropagation(); collapse();
+    });
+  </script>
 </body>
 </html>

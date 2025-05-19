@@ -9,6 +9,18 @@ body.light-theme {
   color: #1a1a1a;
 }
 
+p {
+  font-family: 'Inter'
+}
+
+h2 {
+  font-family: 'Inter'
+}
+
+label {
+  font-family: 'Inter'
+}
+
 /* Contenitore centrale */
 .container {
   resize: horizontal; /* solo ridimensionamento orizzontale */
@@ -171,4 +183,83 @@ body.light-theme #sidebar.close {
   left: 20px;     /* distanza dal bordo sinistro */
   color: #323232;   /* o un altro colore */
   z-index: 1000; 
+}
+
+        .expand-wrapper {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+        }
+
+        .expand-btn {
+            width: 120px;
+            height: 50px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: background 0.3s;
+            padding: 10px;
+        }
+
+        .content {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #2196F3;
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            min-width: 300px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transform-origin: top right;
+            transform: scale(0);
+            opacity: 0;
+            transition: transform 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.5s ease;
+        }
+
+        .expand-wrapper.expanded .content {
+            transform: scale(1) translate(-10px, 0);
+            opacity: 1;
+        }
+
+        /* Nascondi il pulsante iniziale quando espanso */
+        .expand-wrapper.expanded .expand-btn {
+            display: none;
+        }
+
+        .close-btn {
+            display: none;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: transform 0.2s, background 0.2s;
+            z-index: 2;
+        }
+        .expand-wrapper.expanded .close-btn { display: block; }
+        .close-btn:hover { transform: scale(1.2); background: rgba(255,255,255,0.4); }
+
+        .text-content { margin-top: 40px; }
+
+.Credits{
+  border: none;
+  text-align: left
+}
+.Credits:hover{
+  background-color: #222;
+  color: #D4AF37;
+}
+
+.miniimg{
+  height: auto;
+  width: 10px;
 }

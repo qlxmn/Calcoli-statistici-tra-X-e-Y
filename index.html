@@ -168,7 +168,7 @@ body.light-theme .content {
 </head>
 <body class="dark-theme">
   <div class="container">
-    <button id="toggleTheme">🌙 Cambia tema</button>
+    <!--<button id="toggleTheme">🌙 Cambia tema</button>-->
     <h2>Calcoli statistici tra X e Y</h2>
 
     <label>Quanti valori vuoi inserire?</label>
@@ -444,8 +444,8 @@ body.light-theme .content {
             // Media ponderata con pesi = frequenze
             const pesoTotaleX = Object.values(frequenzeX).reduce((acc, freq) => acc + freq, 0);
             const pesoTotaleY = Object.values(frequenzeY).reduce((acc, freq) => acc + freq, 0);
-            const mediaPonderataX = x.reduce((acc, xi) => acc + xi * frequenzeX[xi], 0) / pesoTotaleX;
-            const mediaPonderataY = y.reduce((acc, yi) => acc + yi * frequenzeY[yi], 0) / pesoTotaleY;
+            const mediaPonderataX = mediaAritmeticaX;
+            const mediaPonderataY = mediaAritmeticaY;
             
             let mediaGeometricaXOutput, mediaGeometricaYOutput;
             let mediaArmonicaXOutput, mediaArmonicaYOutput;
@@ -767,10 +767,15 @@ body.light-theme .content {
       document.getElementById('toggleTheme').textContent =
         document.body.classList.contains('dark-theme') ? '🌙 Cambia tema' : '☀️ Cambia tema';
     });
+
+    function apriScheda() {
+    window.location.href = 'chi.html';
+  }
   </script>
 
   <div class="expand-wrapper" id="wrapper">
       <button class="expand-btn" id="toggleBtn">🧭Tutorial</button>
+      <button class="expand-btn" id="toggleBtn" onclick="apriScheda()">🧮 χ² e C</button>
       <div class="content" id="contentBox">
           <button class="close-btn" id="closeBtn">×</button>
           <div class="text-content">

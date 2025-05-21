@@ -1,5 +1,5 @@
 # Calcoli-statistici-tra-X-e-Y
-PROVA LA NUOVA VERSIONE (1.1.0)!!! https://qlxmn.github.io/Calcoli-statistici-tra-X-e-Y/
+PROVA LA NUOVA VERSIONE (1.2.0)!!! https://qlxmn.github.io/Calcoli-statistici-tra-X-e-Y/
 
 ## Come e perchè
 Programma in html, utilizzato per studio scolastico, e facilitamento dei calcoli, con funzione di calcolo dati statistici fra X ed Y come: Media/Moda/Mediana, Variazione/Scarto,  Deviazione etc...

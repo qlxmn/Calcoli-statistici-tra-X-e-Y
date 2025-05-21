@@ -8,7 +8,6 @@ Il programma è stato fatto da 2 studenti di 4^a superiore [Antonio Meucci, citt
 Con il supplemento di: ChatGPT, Deepseek e Gemini, per funzioni non ancora studiate.
 
 Funzionalità principale, verificare i calcoli effettuali e fare calcoli semplici di statistica BASE.
-
 Codice open source, aperto a chiunque senza costi aggiuntivi.
 
 ##To do

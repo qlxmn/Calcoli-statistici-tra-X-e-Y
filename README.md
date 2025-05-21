@@ -12,8 +12,8 @@ Funzionalità principale, verificare i calcoli effettuali e fare calcoli semplic
 Codice open source, aperto a chiunque senza costi aggiuntivi.
 
 ## To do
-☑ Media Ponderata Funzionante
-☑ Tasto X^2 e C Funzionante
-☐ Adattamento per smartphone
-☐ Temi (viola, rosso, verde...)
-☐ Cambia Tema (chiaro/scuro)
+☑ Media Ponderata Funzionante  
+☑ Tasto X^2 e C Funzionante  
+☐ Adattamento per smartphone  
+☐ Temi (viola, rosso, verde...)  
+☐ Cambia Tema (chiaro/scuro)  

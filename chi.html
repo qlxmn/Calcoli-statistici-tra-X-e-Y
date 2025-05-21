@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+
+<html lang="it">
+
+<head>
+  <meta charset="UTF-8">
+  <title>χ² e C</title>
+  <style>
+    body {
+      background-color: #222;
+      color: #f9f9f9;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      padding: 2rem;
+      position: relative;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+      background-color: #333;
+      color: #f9f9f9;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    th, td {
+      border: 1px solid #555;
+      padding: 12px;
+      min-width: 80px;
+      text-align: center;
+      background-color: #2b2b2b;
+      transition: background-color 0.3s ease;
+    }
+
+    th {
+      background-color: #444;
+      font-weight: bold;
+    }
+
+    td:focus {
+      outline: 2px solid #D4AF37;
+      background-color: #44422f;
+    }
+
+    .total-cell {
+      background-color: #4a4a4a;
+      font-weight: bold;
+      color: #D4AF37;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .action-btn {
+      background-color: #f0c94d; /* colore dorato chiaro */
+      color: #222;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(244, 203, 77, 0.4);
+      transition:
+        background-color 0.3s ease,
+        transform 0.2s ease,
+        box-shadow 0.3s ease;
+      user-select: none;
+      font-weight: 600;
+    }
+
+    .action-btn:hover {
+      background-color: #d4aa1f; /* dorato più scuro */
+      box-shadow: 0 6px 12px rgba(212, 170, 31, 0.6);
+      transform: translateY(-3px) scale(1.05);
+    }
+
+    .action-btn:active {
+      background-color: #a27c12; /* dorato ancora più scuro */
+      box-shadow: 0 2px 6px rgba(162, 124, 18, 0.8);
+      transform: translateY(1px) scale(0.95);
+    }
+
+    .action-btn.remove {
+      background-color: #e05353; /* rosso acceso */
+      color: #fff;
+      box-shadow: 0 4px 8px rgba(224, 83, 83, 0.5);
+    }
+
+    .action-btn.remove:hover {
+      background-color: #b23333;
+      box-shadow: 0 6px 12px rgba(178, 51, 51, 0.7);
+      transform: translateY(-3px) scale(1.05);
+    }
+
+    .action-btn.remove:active {
+      background-color: #7a2424;
+      box-shadow: 0 2px 6px rgba(122, 36, 36, 0.8);
+      transform: translateY(1px) scale(0.95);
+    }
+
+    /* ANIMAZIONI */
+    @keyframes bounce {
+      0% { transform: scale(1); }
+      30% { transform: scale(1.3); }
+      50% { transform: scale(0.95); }
+      70% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes fadeOutScale {
+      0%   { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(0.8); }
+    }
+
+    .bounce {
+      animation: bounce 0.4s ease;
+    }
+
+    .fade-out {
+      animation: fadeOutScale 0.3s ease forwards;
+    }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      margin-top: 1rem;
+      border-bottom: 2px solid #555;
+    }
+
+    .tab {
+      padding: 10px 15px;
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-weight: bold;
+      color: #ccc;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .tab:hover {
+      color: #D4AF37;
+    }
+
+    .tab.active {
+      border-bottom: 3px solid #D4AF37;
+      color: #D4AF37;
+    }
+
+    .results-container {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background-color: #333;
+      border-radius: 8px;
+      border-left: 4px solid #D4AF37;
+    }
+
+    .results-title {
+      color: #D4AF37;
+      margin-top: 0;
+      margin-bottom: 1rem;
+    }
+
+    .result-value {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #f9f9f9;
+      margin: 0.5rem 0;
+    }
+
+    /* Pulsante Torna indietro */
+    .back-btn {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: #555;
+      color: #f9f9f9;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .back-btn:hover {
+      background-color: #666;
+    }
+  </style>
+</head>
+
+<body class="light-theme">
+  <button class="action-btn" style="margin-left: 20px; margin-top: 20px;" onclick="apriScheda()">← Torna indietro</button>
+  <div class="container">
+    
+    <h2 style="text-align: center;">X^2 e C</h2>
+
+    <div style="overflow-x: auto;">
+      <table id="editableTable">
+        <thead>
+          <tr id="columnHeaders">
+            <th></th> <th>a</th> <th>b</th> <th>c</th> <th class="total-cell">Totale</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>&alpha;</th>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td class="total-cell"></td>
+          </tr>
+          <tr>
+            <th>&beta;</th>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td class="total-cell"></td>
+          </tr>
+          <tr id="totalRow">
+            <th class="total-cell">Totale</th>
+            <td class="total-cell"></td>
+            <td class="total-cell"></td>
+            <td class="total-cell"></td>
+            <td class="total-cell"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="button-group">
+      <button class="action-btn" onclick="addColumn()">➕ Colonna</button>
+      <button class="action-btn remove" onclick="removeColumn()">➖ Colonna</button>
+      <button class="action-btn" onclick="addRow()">➕ Riga</button>
+      <button class="action-btn remove" onclick="removeRow()">➖ Riga</button>
+    </div>
+
+    <div style="text-align:center; margin-top: 1rem;">
+      <button id="generateChiBtn" class="action-btn">Genera Tabella χ² e C</button>
+    </div>
+
+    <div id="chiTableContainer" style="overflow-x:auto; margin-top:1.5rem;"></div>
+    <div id="resultsContainer" class="results-container hidden">
+      <h3 class="results-title">Risultati</h3>
+      <div class="result-value">χ²: <span id="chi2Result">0</span></div>
+      <div class="result-value">C: <span id="chi2NormalizedResult">0</span></div>
+    </div>
+
+  </div>
+
+  <script>
+    function apriScheda() {
+    window.location.href = 'index.html';
+  }
+    const table = document.getElementById("editableTable");
+    const columnHeadersRow = document.getElementById("columnHeaders");
+    const totalRow = document.getElementById("totalRow");
+
+    const latinLowercase = 'abcdefghijklmnopqrstuvwxyz'.split('');
+    const greekLowercase = [
+      '&gamma;', '&delta;', '&epsilon;', '&zeta;', '&eta;', '&theta;', '&iota;', '&kappa;', '&lambda;', '&mu;',
+      '&nu;', '&xi;', '&omicron;', '&pi;', '&rho;', '&sigma;', '&tau;', '&upsilon;', '&phi;',
+      '&chi;', '&psi;', '&omega;'
+    ];
+    let nextColumnIndex = 3;
+    let nextRowIndex = 0;
+    const MIN_DATA_COLUMNS = 1;
+    const MIN_DATA_ROWS = 1;
+
+    function updateTotals() {
+      const rows = table.rows;
+      const numRows = rows.length;
+      const numCols = rows[0].cells.length;
+
+      for (let i = 1; i < numRows - 1; i++) {
+        let rowSum = 0;
+        for (let j = 1; j < numCols - 1; j++) {
+          const cellValue = parseFloat(rows[i].cells[j].textContent) || 0;
+          rowSum += cellValue;
+        }
+        rows[i].cells[numCols - 1].textContent = rowSum;
+      }
+
+      let grandTotal = 0;
+      for (let j = 1; j < numCols - 1; j++) {
+        let colSum = 0;
+        for (let i = 1; i < numRows - 1; i++) {
+          const cellValue = parseFloat(rows[i].cells[j].textContent) || 0;
+          colSum += cellValue;
+        }
+        totalRow.cells[j].textContent = colSum;
+        grandTotal += colSum;
+      }
+      totalRow.cells[numCols - 1].textContent = grandTotal;
+    }
+
+    function addInputListenersToDataCells() {
+      for (let i = 1; i < table.rows.length - 1; i++) {
+        for (let j = 1; j < table.rows[i].cells.length - 1; j++) {
+          const cell = table.rows[i].cells[j];
+          if (cell.contentEditable === "true") {
+            cell.addEventListener('input', updateTotals);
+          }
+        }
+      }
+    }
+
+    function addRow() {
+      if (nextRowIndex >= greekLowercase.length) {
+        alert("Fine dell'alfabeto greco.");
+        return;
+      }
+
+      const tbody = table.querySelector("tbody");
+      const newRow = tbody.insertBefore(document.createElement('tr'), totalRow);
+      const headerCell = newRow.insertCell();
+      headerCell.outerHTML = `<th>${greekLowercase[nextRowIndex++]}</th>`;
+
+      const currentDataColumns = columnHeadersRow.cells.length - 2;
+      for (let i = 0; i < currentDataColumns; i++) {
+        const cell = newRow.insertCell();
+        cell.contentEditable = "true";
+        cell.textContent = "";
+        cell.addEventListener('input', updateTotals);
+      }
+      const rowTotalCell = newRow.insertCell();
+      rowTotalCell.classList.add('total-cell');
+      rowTotalCell.textContent = "0";
+
+      updateTotals();
+    }
+
+    function addColumn() {
+      if (nextColumnIndex >= latinLowercase.length) {
+        alert("Fine dell'alfabeto latino.");
+        return;
+      }
+
+      const totalHeader = columnHeadersRow.querySelector('.total-cell');
+      const newHeader = document.createElement('th');
+      newHeader.textContent = latinLowercase[nextColumnIndex++];
+      columnHeadersRow.insertBefore(newHeader, totalHeader);
+
+      for (let i = 1; i < table.rows.length - 1; i++) {
+        const row = table.rows[i];
+        const cell = row.insertCell(row.cells.length - 1);
+        cell.contentEditable = "true";
+        cell.textContent = "";
+        cell.addEventListener('input', updateTotals);
+      }
+
+      const totalColCell = totalRow.insertCell(totalRow.cells.length - 1);
+      totalColCell.classList.add('total-cell');
+      totalColCell.textContent = "0";
+
+      updateTotals();
+    }
+
+    function removeRow() {
+      const currentDataRows = table.rows.length - 2;
+      if (currentDataRows <= MIN_DATA_ROWS) {
+        alert("Deve restare almeno una riga.");
+        return;
+      }
+
+      const tbody = table.querySelector("tbody");
+      tbody.removeChild(totalRow.previousElementSibling);
+      nextRowIndex--;
+      updateTotals();
+    }
+
+    function removeColumn() {
+      const currentDataColumns = columnHeadersRow.cells.length - 2;
+      if (currentDataColumns <= MIN_DATA_COLUMNS) {
+        alert("Deve restare almeno una colonna.");
+        return;
+      }
+
+      columnHeadersRow.removeChild(columnHeadersRow.cells[currentDataColumns]);
+      for (let i = 1; i < table.rows.length - 1; i++) {
+        table.rows[i].deleteCell(currentDataColumns);
+      }
+      totalRow.deleteCell(currentDataColumns);
+
+      nextColumnIndex--;
+      updateTotals();
+    }
+
+    // Aggiorna i totali all'avvio e aggiunge listener
+    updateTotals();
+    addInputListenersToDataCells();
+
+    // Funzione per generare la tabella chi²
+    document.getElementById('generateChiBtn').addEventListener('click', () => {
+      const data = [];
+      const rows = table.rows;
+      const numRows = rows.length - 2; // Escludo intestazione e riga totale
+      const numCols = rows[0].cells.length - 2; // Escludo intestazione e colonna totale
+
+      // Leggi i dati numerici
+      for (let i = 1; i <= numRows; i++) {
+        const rowData = [];
+        for (let j = 1; j <= numCols; j++) {
+          const val = parseFloat(rows[i].cells[j].textContent);
+          if (isNaN(val)) {
+            alert("Valori numerici richiesti nelle celle di dati.");
+            return;
+          }
+          rowData.push(val);
+        }
+        data.push(rowData);
+      }
+
+      // Totali
+      const rowTotals = [];
+      const colTotals = Array(numCols).fill(0);
+      let grandTotal = 0;
+
+      for (let i = 0; i < numRows; i++) {
+        const rSum = data[i].reduce((a,b) => a+b, 0);
+        rowTotals.push(rSum);
+        grandTotal += rSum;
+        for (let j = 0; j < numCols; j++) {
+          colTotals[j] += data[i][j];
+        }
+      }
+
+      // Calcolo expected
+      const expected = [];
+      for (let i = 0; i < numRows; i++) {
+        expected[i] = [];
+        for (let j = 0; j < numCols; j++) {
+          expected[i][j] = (rowTotals[i] * colTotals[j]) / grandTotal;
+        }
+      }
+
+      // Calcolo chi² e chi² normalizzato
+let chi2 = 0;
+for (let i = 0; i < numRows; i++) {
+  for (let j = 0; j < numCols; j++) {
+    const O = data[i][j];
+    const E = expected[i][j];
+    // Aggiungi un controllo per E > 0 per evitare divisioni per zero
+    if (E > 0) {
+      chi2 += ((O - E) ** 2) / E;
+    } else {
+      // Handle cases where Expected is zero, depending on statistical conventions
+      // For very small expected values, some adjustments might be needed.
+      // For simplicity here, we'll skip contributing to chi2 if E is 0,
+      // but in real analysis, this might indicate an issue with the model or data.
+      console.warn(`Expected value is zero for cell [${i}][${j}]. This cell will not contribute to Chi-squared.`);
+    }
+  }
+}
+ 
+// Calcola il chi² normalizzato
+// Degrees of freedom (df) = (numRows - 1) * (numCols - 1)
+const h = Math.max(numRows, numCols); // Calcola h (il massimo tra numero di righe e numero di colonne)
+      let chi2_normalized = 0;
+      if (grandTotal * (h - 1) > 0) {
+        chi2_normalized = chi2 / (grandTotal * (h - 1));
+      } else {
+        console.warn("Impossibile calcolare il Chi-quadro normalizzato: il denominatore è zero.");
+      }
+
+      // Costruzione tabella chi² da mostrare
+      const container = document.getElementById('chiTableContainer');
+      container.innerHTML = ""; // svuota
+
+      const chiTable = document.createElement('table');
+      // Header
+      const thead = document.createElement('thead');
+      const headerRow = document.createElement('tr');
+
+      headerRow.appendChild(document.createElement('th')); // vuoto sopra righe
+      // Copia intestazioni colonne originali senza "Totale"
+      for (let j = 1; j <= numCols; j++) {
+        const th = document.createElement('th');
+        th.innerHTML = columnHeadersRow.cells[j].textContent;
+        headerRow.appendChild(th);
+      }
+      const thTotal = document.createElement('th');
+      thTotal.textContent = "Totale";
+      thTotal.classList.add('total-cell');
+      headerRow.appendChild(thTotal);
+      thead.appendChild(headerRow);
+      chiTable.appendChild(thead);
+
+      // Corpo con expected e chi² normalizzato a fine
+      const tbodyChi = document.createElement('tbody');
+
+      // righe expected
+      for (let i = 0; i < numRows; i++) {
+        const tr = document.createElement('tr');
+        const rowHeader = document.createElement('th');
+        rowHeader.innerHTML = rows[i+1].cells[0].innerHTML;
+        tr.appendChild(rowHeader);
+
+        let rowExpTotal = 0;
+        for (let j = 0; j < numCols; j++) {
+          const td = document.createElement('td');
+          td.textContent = expected[i][j].toFixed(2);
+          tr.appendChild(td);
+          rowExpTotal += expected[i][j];
+        }
+        const tdRowTotal = document.createElement('td');
+        tdRowTotal.classList.add('total-cell');
+        tdRowTotal.textContent = rowExpTotal.toFixed(2);
+        tr.appendChild(tdRowTotal);
+
+        tbodyChi.appendChild(tr);
+      }
+
+      // riga totali expected
+      const trTotalExpected = document.createElement('tr');
+      const thTotalExp = document.createElement('th');
+      thTotalExp.classList.add('total-cell');
+      thTotalExp.textContent = "Totale";
+      trTotalExpected.appendChild(thTotalExp);
+
+      let grandExpTotal = 0;
+      for (let j = 0; j < numCols; j++) {
+        const td = document.createElement('td');
+        td.classList.add('total-cell');
+        td.textContent = colTotals[j].toFixed(2);
+        trTotalExpected.appendChild(td);
+        grandExpTotal += colTotals[j];
+      }
+      const tdGrandTotal = document.createElement('td');
+      tdGrandTotal.classList.add('total-cell');
+      tdGrandTotal.textContent = grandExpTotal.toFixed(2);
+      trTotalExpected.appendChild(tdGrandTotal);
+
+      tbodyChi.appendChild(trTotalExpected);
+
+      chiTable.appendChild(tbodyChi);
+      container.appendChild(chiTable);
+
+      // COSTRUISCI tabella delle differenze (Osservato - Atteso)
+      const diffTable = document.createElement('table');
+
+      // Header
+      const theadDiff = document.createElement('thead');
+      const headerRowDiff = document.createElement('tr');
+      headerRowDiff.appendChild(document.createElement('th')); // vuoto per intestazioni riga
+
+      for (let j = 1; j <= numCols; j++) {
+        const th = document.createElement('th');
+        th.innerHTML = columnHeadersRow.cells[j].textContent;
+        headerRowDiff.appendChild(th);
+      }
+      const thTotalDiff = document.createElement('th');
+      thTotalDiff.textContent = "Totale";
+      thTotalDiff.classList.add('total-cell');
+      headerRowDiff.appendChild(thTotalDiff);
+
+      theadDiff.appendChild(headerRowDiff);
+      diffTable.appendChild(theadDiff);
+
+      // Corpo
+      const tbodyDiff = document.createElement('tbody');
+      for (let i = 0; i < numRows; i++) {
+        const tr = document.createElement('tr');
+        const rowHeader = document.createElement('th');
+        rowHeader.innerHTML = rows[i + 1].cells[0].innerHTML;
+        tr.appendChild(rowHeader);
+
+        let rowDiffTotal = 0;
+        for (let j = 0; j < numCols; j++) {
+          const diff = data[i][j] - expected[i][j];
+          const td = document.createElement('td');
+          td.textContent = diff.toFixed(2);
+          tr.appendChild(td);
+          rowDiffTotal += diff;
+        }
+
+        const tdRowTotal = document.createElement('td');
+        tdRowTotal.classList.add('total-cell');
+        tdRowTotal.textContent = rowDiffTotal.toFixed(2);
+        tr.appendChild(tdRowTotal);
+        tbodyDiff.appendChild(tr);
+      }
+
+      // Riga totale colonne
+      const trColTotal = document.createElement('tr');
+      const thLabel = document.createElement('th');
+      thLabel.classList.add('total-cell');
+      thLabel.textContent = "Totale";
+      trColTotal.appendChild(thLabel);
+
+      let totalDiffSum = 0;
+      for (let j = 0; j < numCols; j++) {
+        let colDiffSum = 0;
+        for (let i = 0; i < numRows; i++) {
+          colDiffSum += (data[i][j] - expected[i][j]);
+        }
+        const td = document.createElement('td');
+        td.classList.add('total-cell');
+        td.textContent = colDiffSum.toFixed(2);
+        trColTotal.appendChild(td);
+        totalDiffSum += colDiffSum;
+      }
+      const tdTotalDiff = document.createElement('td');
+      tdTotalDiff.classList.add('total-cell');
+      tdTotalDiff.textContent = totalDiffSum.toFixed(2);
+      trColTotal.appendChild(tdTotalDiff);
+      tbodyDiff.appendChild(trColTotal);
+
+      diffTable.appendChild(tbodyDiff);
+
+      // Titolo e append della nuova tabella
+      const title = document.createElement('h3');
+      title.style.textAlign = 'center';
+      title.textContent = "Differenze (Osservato - Atteso)";
+      container.appendChild(title);
+      container.appendChild(diffTable);
+
+      // Mostra i risultati
+      const resultsContainer = document.getElementById('resultsContainer');
+      document.getElementById('chi2Result').textContent = chi2.toFixed(4);
+      document.getElementById('chi2NormalizedResult').textContent = chi2_normalized.toFixed(4);
+      resultsContainer.classList.remove('hidden');
+    });
+  </script>
+</body>
+</html>

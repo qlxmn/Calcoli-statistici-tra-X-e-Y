@@ -55,6 +55,7 @@
     position: fixed;
     top: 20px;
     right: 20px;
+    z-index: 1000; /* Uguale o superiore al theme-selector */
 }
 
 .expand-btn {
@@ -79,11 +80,12 @@
     border-radius: 15px;
     padding: 20px;
     min-width: 340px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     transform-origin: top right;
     transform: scale(0);
     opacity: 0;
     transition: transform 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.5s ease;
+    z-index: 1001;
 }
 
 .expand-wrapper.expanded .content {
@@ -109,7 +111,7 @@
     padding: 4px 8px;
     border-radius: 4px;
     transition: transform 0.2s, background 0.2s, color 0.2s, border-color 0.2s; /* Aggiunta transizione per colore e bordo */
-    z-index: 2;
+    z-index: 1002; /* Sopra il contenuto espanso */
 }
 
 .expand-wrapper.expanded .close-btn { display: block; }
@@ -158,6 +160,89 @@ body.light-theme .content {
         color: #888;
         font-size: 14px;
     }
+
+        .theme-selector {
+      position: fixed;
+      display: flex;
+      flex-direction: column;
+      top: 20px;
+      left: 20px;
+      background: #222;
+      padding: 10px;
+      border-radius: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      width: 150px;
+      z-index: 1000;
+    }
+    
+    .theme-selector h4 {
+      margin: 0 0 8px 0;
+      color: white;
+      width: 100%;
+      text-align: left;
+      margin-left: 3px;
+    }
+    
+    .color-option {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid white;
+      transition: transform 0.2s;
+    }
+    
+    .color-option:hover {
+      transform: scale(1.1);
+    }
+    
+    /* Colori predefiniti per le opzioni */
+    .gold { background-color: #D4AF37; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);}
+    .blue { background-color: #4285F4; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);  }
+    .red { background-color: #EA4335; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); }
+    .green { background-color: #34A853; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);  }
+    .purple { background-color: #9C27B0; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);  }
+    .teal { background-color: #009688; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);  }
+    
+    /* Regole per cambiare il colore dei dettagli */
+    body.gold-theme .tab.active,
+    body.gold-theme .close-btn:hover {
+      border-color: #D4AF37;
+      color: #D4AF37;
+    }
+    
+    body.blue-theme .tab.active,
+    body.blue-theme .close-btn:hover {
+      border-color: #4285F4;
+      color: #4285F4;
+    }
+    
+    body.red-theme .tab.active,
+    body.red-theme .close-btn:hover {
+      border-color: #EA4335;
+      color: #EA4335;
+    }
+    
+    body.green-theme .tab.active,
+    body.green-theme .close-btn:hover {
+      border-color: #34A853;
+      color: #34A853;
+    }
+    
+    body.purple-theme .tab.active,
+    body.purple-theme .close-btn:hover {
+      border-color: #9C27B0;
+      color: #9C27B0;
+    }
+    
+    body.teal-theme .tab.active,
+    body.teal-theme .close-btn:hover {
+      border-color: #009688;
+      color: #009688;
+    }
+
   </style>
 
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
@@ -166,7 +251,7 @@ body.light-theme .content {
   </script>
 
 </head>
-<body class="dark-theme">
+<body class="dark-theme gold-theme">
   <div class="container">
     <!--<button id="toggleTheme">🌙 Cambia tema</button>-->
     <h2>Calcoli statistici tra X e Y</h2>
@@ -215,7 +300,35 @@ body.light-theme .content {
     <div id="errore" class="error"></div>
   </div>
 
+  <div class="theme-selector">
+    <div class="color-option gold" onclick="changeThemeColor('gold')"></div>
+    <div class="color-option blue" onclick="changeThemeColor('blue')"></div>
+    <div class="color-option red" onclick="changeThemeColor('red')"></div>
+    <div class="color-option green" onclick="changeThemeColor('green')"></div>
+    <div class="color-option purple" onclick="changeThemeColor('purple')"></div>
+    <div class="color-option teal" onclick="changeThemeColor('teal')"></div>
+  </div>
+
   <script>
+
+    function changeThemeColor(color) {
+      // Rimuovi tutte le classi di colore tema
+      document.body.classList.remove(
+        'gold-theme', 'blue-theme', 'red-theme', 
+        'green-theme', 'purple-theme', 'teal-theme'
+      );
+      
+      // Aggiungi la nuova classe di colore
+      document.body.classList.add(color + '-theme');
+      
+      // Aggiorna anche il colore del bordo del pulsante attivo nella tab
+      const activeTab = document.querySelector('.tab.active');
+      if (activeTab) {
+        activeTab.style.borderBottomColor = getComputedStyle(document.documentElement)
+          .getPropertyValue('--theme-color');
+      }
+    }
+
     let x = [], y = [], n = 0;
     let mediaX = 0, mediaY = 0;
     let sigmaX = 0, sigmaY = 0, covXY = 0, a = 0, b = 0;

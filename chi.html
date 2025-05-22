@@ -273,12 +273,28 @@
 
     const latinLowercase = 'abcdefghijklmnopqrstuvwxyz'.split('');
     const greekLowercase = [
-      '&gamma;', '&delta;', '&epsilon;', '&zeta;', '&eta;', '&theta;', '&iota;', '&kappa;', '&lambda;', '&mu;',
+      '&alpha;', '&beta;', '&gamma;', '&delta;', '&epsilon;', '&zeta;', '&eta;', '&theta;', '&iota;', '&kappa;', '&lambda;', '&mu;',
       '&nu;', '&xi;', '&omicron;', '&pi;', '&rho;', '&sigma;', '&tau;', '&upsilon;', '&phi;',
       '&chi;', '&psi;', '&omega;'
     ];
-    let nextColumnIndex = 3;
-    let nextRowIndex = 0;
+    
+    // Keep track of available Latin letters for columns
+    let availableColumnLetters = [];
+    for (let i = 0; i < latinLowercase.length; i++) {
+        availableColumnLetters.push(latinLowercase[i]);
+    }
+    // Initialize with 'a', 'b', 'c' used
+    availableColumnLetters.splice(0, 3); 
+
+    // Keep track of available Greek letters for rows
+    let availableRowLetters = [];
+    for (let i = 0; i < greekLowercase.length; i++) {
+        availableRowLetters.push(greekLowercase[i]);
+    }
+    // Initialize with '&alpha;', '&beta;' used
+    availableRowLetters.splice(0, 2); 
+
+
     const MIN_DATA_COLUMNS = 1;
     const MIN_DATA_ROWS = 1;
 
@@ -321,84 +337,105 @@
     }
 
     function addRow() {
-      if (nextRowIndex >= greekLowercase.length) {
-        alert("Fine dell'alfabeto greco.");
-        return;
-      }
+        if (availableRowLetters.length === 0) {
+            alert("Hai usato tutte le lettere greche disponibili per le righe.");
+            return;
+        }
 
-      const tbody = table.querySelector("tbody");
-      const newRow = tbody.insertBefore(document.createElement('tr'), totalRow);
-      const headerCell = newRow.insertCell();
-      headerCell.outerHTML = `<th>${greekLowercase[nextRowIndex++]}</th>`;
+        const newRowLetter = availableRowLetters.shift(); // Get and remove the first available letter
 
-      const currentDataColumns = columnHeadersRow.cells.length - 2;
-      for (let i = 0; i < currentDataColumns; i++) {
-        const cell = newRow.insertCell();
-        cell.contentEditable = "true";
-        cell.textContent = "";
-        cell.addEventListener('input', updateTotals);
-      }
-      const rowTotalCell = newRow.insertCell();
-      rowTotalCell.classList.add('total-cell');
-      rowTotalCell.textContent = "0";
+        const tbody = table.querySelector("tbody");
+        const newRow = tbody.insertBefore(document.createElement('tr'), totalRow);
+        const headerCell = newRow.insertCell();
+        headerCell.outerHTML = `<th>${newRowLetter}</th>`;
 
-      updateTotals();
+        const currentDataColumns = columnHeadersRow.cells.length - 2;
+        for (let i = 0; i < currentDataColumns; i++) {
+            const cell = newRow.insertCell();
+            cell.contentEditable = "true";
+            cell.textContent = "";
+            cell.addEventListener('input', updateTotals);
+        }
+        const rowTotalCell = newRow.insertCell();
+        rowTotalCell.classList.add('total-cell');
+        rowTotalCell.textContent = "0";
+
+        updateTotals();
     }
 
     function addColumn() {
-      if (nextColumnIndex >= latinLowercase.length) {
-        alert("Fine dell'alfabeto latino.");
-        return;
-      }
+        if (availableColumnLetters.length === 0) {
+            alert("Hai usato tutte le lettere latine disponibili per le colonne.");
+            return;
+        }
 
-      const totalHeader = columnHeadersRow.querySelector('.total-cell');
-      const newHeader = document.createElement('th');
-      newHeader.textContent = latinLowercase[nextColumnIndex++];
-      columnHeadersRow.insertBefore(newHeader, totalHeader);
+        const newColumnLetter = availableColumnLetters.shift(); // Get and remove the first available letter
 
-      for (let i = 1; i < table.rows.length - 1; i++) {
-        const row = table.rows[i];
-        const cell = row.insertCell(row.cells.length - 1);
-        cell.contentEditable = "true";
-        cell.textContent = "";
-        cell.addEventListener('input', updateTotals);
-      }
+        const totalHeader = columnHeadersRow.querySelector('.total-cell');
+        const newHeader = document.createElement('th');
+        newHeader.textContent = newColumnLetter;
+        columnHeadersRow.insertBefore(newHeader, totalHeader);
 
-      const totalColCell = totalRow.insertCell(totalRow.cells.length - 1);
-      totalColCell.classList.add('total-cell');
-      totalColCell.textContent = "0";
+        for (let i = 1; i < table.rows.length - 1; i++) {
+            const row = table.rows[i];
+            const cell = row.insertCell(row.cells.length - 1);
+            cell.contentEditable = "true";
+            cell.textContent = "";
+            cell.addEventListener('input', updateTotals);
+        }
 
-      updateTotals();
+        const totalColCell = totalRow.insertCell(totalRow.cells.length - 1);
+        totalColCell.classList.add('total-cell');
+        totalColCell.textContent = "0";
+
+        updateTotals();
     }
 
     function removeRow() {
-      const currentDataRows = table.rows.length - 2;
-      if (currentDataRows <= MIN_DATA_ROWS) {
-        alert("Deve restare almeno una riga.");
-        return;
-      }
+        const currentDataRows = table.rows.length - 2;
+        if (currentDataRows <= MIN_DATA_ROWS) {
+            alert("Deve restare almeno una riga.");
+            return;
+        }
 
-      const tbody = table.querySelector("tbody");
-      tbody.removeChild(totalRow.previousElementSibling);
-      nextRowIndex--;
-      updateTotals();
+        const tbody = table.querySelector("tbody");
+        const removedRow = totalRow.previousElementSibling;
+        const removedHeader = removedRow.querySelector('th').innerHTML;
+        tbody.removeChild(removedRow);
+        
+        // Add the removed letter back to the available list, maintaining order
+        const originalIndex = greekLowercase.indexOf(removedHeader);
+        if (originalIndex !== -1) {
+            availableRowLetters.splice(originalIndex - (greekLowercase.length - availableRowLetters.length), 0, removedHeader);
+            availableRowLetters.sort((a,b) => greekLowercase.indexOf(a) - greekLowercase.indexOf(b)); // Re-sort to maintain alphabetical order
+        }
+        
+        updateTotals();
     }
 
     function removeColumn() {
-      const currentDataColumns = columnHeadersRow.cells.length - 2;
-      if (currentDataColumns <= MIN_DATA_COLUMNS) {
-        alert("Deve restare almeno una colonna.");
-        return;
-      }
+        const currentDataColumns = columnHeadersRow.cells.length - 2;
+        if (currentDataColumns <= MIN_DATA_COLUMNS) {
+            alert("Deve restare almeno una colonna.");
+            return;
+        }
 
-      columnHeadersRow.removeChild(columnHeadersRow.cells[currentDataColumns]);
-      for (let i = 1; i < table.rows.length - 1; i++) {
-        table.rows[i].deleteCell(currentDataColumns);
-      }
-      totalRow.deleteCell(currentDataColumns);
+        const removedHeader = columnHeadersRow.cells[currentDataColumns].textContent;
+        columnHeadersRow.removeChild(columnHeadersRow.cells[currentDataColumns]);
+        
+        for (let i = 1; i < table.rows.length - 1; i++) {
+            table.rows[i].deleteCell(currentDataColumns);
+        }
+        totalRow.deleteCell(currentDataColumns);
 
-      nextColumnIndex--;
-      updateTotals();
+        // Add the removed letter back to the available list, maintaining order
+        const originalIndex = latinLowercase.indexOf(removedHeader);
+        if (originalIndex !== -1) {
+            availableColumnLetters.splice(originalIndex - (latinLowercase.length - availableColumnLetters.length), 0, removedHeader);
+            availableColumnLetters.sort((a,b) => latinLowercase.indexOf(a) - latinLowercase.indexOf(b)); // Re-sort to maintain alphabetical order
+        }
+        
+        updateTotals();
     }
 
     // Aggiorna i totali all'avvio e aggiunge listener

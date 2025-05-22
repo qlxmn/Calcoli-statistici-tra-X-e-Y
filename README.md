@@ -13,7 +13,7 @@ Codice open source, aperto a chiunque senza costi aggiuntivi.
 
 ## To do
 ☑ Media Ponderata Funzionante  
-☑ Tasto X^2 e C Funzionante
+☑ Tasto X^2 e C Funzionante  
 ☑ Temi (viola, rosso, verde...)  
 ☐ Adattamento per smartphone  
 ☐ Cambia Tema (chiaro/scuro)  

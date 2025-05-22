@@ -1,5 +1,5 @@
 # Calcoli-statistici-tra-X-e-Y
-PROVA LA NUOVA VERSIONE (1.2.0)!!! https://qlxmn.github.io/Calcoli-statistici-tra-X-e-Y/
+PROVA LA NUOVA VERSIONE (1.2.5)!!! https://qlxmn.github.io/Calcoli-statistici-tra-X-e-Y/
 
 ## Come e perchè
 Programma in html, utilizzato per studio scolastico, e facilitamento dei calcoli, con funzione di calcolo dati statistici fra X ed Y come: Media/Moda/Mediana, Variazione/Scarto,  Deviazione etc...
@@ -15,5 +15,5 @@ Codice open source, aperto a chiunque senza costi aggiuntivi.
 ☑ Media Ponderata Funzionante  
 ☑ Tasto X^2 e C Funzionante  
 ☐ Adattamento per smartphone  
-☐ Temi (viola, rosso, verde...)  
+☑ Temi (viola, rosso, verde...)  
 ☐ Cambia Tema (chiaro/scuro)  
